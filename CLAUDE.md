@@ -6,17 +6,23 @@ This document provides context and guidelines for AI assistants working on the K
 
 **KIKurs** is an educational course repository for learning AI (Künstliche Intelligenz) and Machine Learning fundamentals. The course is in German and includes lessons, exercises, and code examples.
 
-**Current Status:** Basic course structure in place with first lesson.
+**Current Status:** Course structure with 3 lessons in place.
 
 ## Repository Structure
 
 ```
 KIKurs/
 ├── lektionen/              # Course lessons (theory)
-│   └── 01-einfuehrung/     # Lesson 1: Introduction to AI
+│   ├── 01-einfuehrung/     # Lesson 1: Introduction to AI
+│   ├── 02-ml-grundlagen/   # Lesson 2: Machine Learning Basics
+│   └── 03-neuronale-netze/ # Lesson 3: Neural Networks
 ├── uebungen/               # Exercises for each lesson
-│   └── 01-einfuehrung/     # Exercises for Lesson 1
+│   ├── 01-einfuehrung/     # Exercises for Lesson 1
+│   ├── 02-ml-grundlagen/   # Exercises for Lesson 2
+│   └── 03-neuronale-netze/ # Exercises for Lesson 3
 ├── beispiele/              # Code examples to experiment with
+│   ├── hallo_ki.py         # Simple rule-based chatbot
+│   └── neuron_demo.py      # Neuron and neural network demo
 ├── daten/                  # Datasets for exercises
 ├── CLAUDE.md               # This file - AI assistant guidelines
 └── README.md               # Project description and setup
