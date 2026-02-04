@@ -4,20 +4,31 @@ This document provides context and guidelines for AI assistants working on the K
 
 ## Project Overview
 
-**KIKurs** is a project repository currently in its initial setup phase. The name suggests educational/course-related content (German: "Kurs" = Course, "KI" = AI/Artificial Intelligence).
+**KIKurs** is an educational course repository for learning AI (Künstliche Intelligenz) and Machine Learning fundamentals. The course is in German and includes lessons, exercises, and code examples.
 
-**Current Status:** Newly initialized repository awaiting content development.
+**Current Status:** Basic course structure in place with first lesson.
 
 ## Repository Structure
 
 ```
 KIKurs/
-├── .git/              # Git repository metadata
-├── CLAUDE.md          # This file - AI assistant guidelines
-└── README.md          # Project description
+├── lektionen/              # Course lessons (theory)
+│   └── 01-einfuehrung/     # Lesson 1: Introduction to AI
+├── uebungen/               # Exercises for each lesson
+│   └── 01-einfuehrung/     # Exercises for Lesson 1
+├── beispiele/              # Code examples to experiment with
+├── daten/                  # Datasets for exercises
+├── CLAUDE.md               # This file - AI assistant guidelines
+└── README.md               # Project description and setup
 ```
 
-As the project grows, update this structure documentation accordingly.
+## Course Content
+
+The course covers:
+1. **Einführung in KI** - What is AI?
+2. **Machine Learning Grundlagen** - Supervised/unsupervised learning
+3. **Neuronale Netze** - How neural networks work
+4. **Praktische Anwendungen** - AI in practice
 
 ## Development Workflow
 
