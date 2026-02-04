@@ -15,10 +15,14 @@ Ein praktischer Kurs zum Erlernen von KI und Machine Learning Grundlagen.
 
 ```
 KIKurs/
-├── lektionen/      # Theoretische Inhalte
-├── uebungen/       # Praktische Aufgaben
-├── beispiele/      # Code-Beispiele zum Ausprobieren
-└── daten/          # Datensätze für Übungen
+├── lektionen/           # Theoretische Inhalte
+│   ├── 01-einfuehrung/
+│   ├── 02-ml-grundlagen/
+│   ├── 03-neuronale-netze/
+│   └── 04-praxis/
+├── uebungen/            # Praktische Aufgaben
+├── beispiele/           # Code-Beispiele zum Ausprobieren
+└── daten/               # Datensätze für Übungen
 ```
 
 ## Voraussetzungen
@@ -39,8 +43,8 @@ python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # oder: venv\Scripts\activate  # Windows
 
-# Abhängigkeiten installieren (sobald vorhanden)
-# pip install -r requirements.txt
+# Abhängigkeiten installieren
+pip install -r requirements.txt
 ```
 
 ## Erste Schritte
