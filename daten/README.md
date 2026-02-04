@@ -46,6 +46,29 @@ modell.fit(X_train, y_train)
 print(f"Genauigkeit: {modell.score(X_test, y_test):.2%}")
 ```
 
+## wetter.csv
+
+Ein synthetischer Datensatz zur Wettervorhersage.
+
+**Aufgabe:** Vorhersagen, ob es regnen wird.
+
+### Features (Eingaben)
+
+| Spalte | Beschreibung | Wertebereich |
+|--------|--------------|--------------|
+| temperatur | Temperatur in °C | 12-32 |
+| luftfeuchtigkeit | Luftfeuchtigkeit in % | 35-92 |
+| wind_kmh | Windgeschwindigkeit km/h | 5-38 |
+| bewoelkung | Bewölkung in % | 5-100 |
+
+### Label (Ausgabe)
+
+| Spalte | Beschreibung | Werte |
+|--------|--------------|-------|
+| regen | Wird es regnen? | 0 = Nein, 1 = Ja |
+
+---
+
 ## Weitere Datensätze
 
 Für mehr Übungsdaten kannst du auch die eingebauten Datensätze von scikit-learn verwenden:
