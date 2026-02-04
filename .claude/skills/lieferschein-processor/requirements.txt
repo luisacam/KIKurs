@@ -1,0 +1,25 @@
+# Lieferschein Processor Dependencies
+# Install with: pip install -r requirements.txt
+
+# PDF Processing
+pdf2image>=1.16.0
+
+# Image Processing
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+
+# OCR Engine (optional, for offline processing)
+paddleocr>=2.7.0
+paddlepaddle>=2.5.0  # Required by PaddleOCR
+
+# Anthropic Claude API (for Claude Vision)
+anthropic>=0.18.0
+
+# Excel Export
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Note: System dependencies also required:
+# - Ubuntu/Debian: apt-get install poppler-utils
+# - macOS: brew install poppler
+# - Windows: Install Poppler and add to PATH
