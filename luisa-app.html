@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Luisas Produktiv-App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ========== CSS Custom Properties ========== */
+:root {
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.18);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.28);
+  --transition: 0.25s ease;
+  --cat-rossbacher: #4a90d9;
+  --cat-ki: #9b6dd7;
+  --cat-kreativ: #c9a84c;
+  --cat-familie: #d9739e;
+  --cat-persoenlich: #4ecdc4;
+  --shop-obst: #66bb6a;
+  --shop-milch: #42a5f5;
+  --shop-fleisch: #ef5350;
+  --shop-brot: #d4a056;
+  --shop-trocken: #8d6e63;
+  --shop-haushalt: #ab47bc;
+  --shop-tk: #29b6f6;
+  --shop-sonstiges: #78909c;
+  --min-touch: 48px;
+  --input-height: 54px;
+  --btn-height: 50px;
+  --checkbox-size: 28px;
+  --checkbox-touch: 44px;
+}
+[data-theme="dark"] {
+  --bg: #141821;
+  --bg-card: #1c2030;
+  --bg-input: #232840;
+  --bg-hover: #2a3050;
+  --text: #e8e6e1;
+  --text-muted: #9a98a0;
+  --text-dim: #6b6977;
+  --accent: #c9a84c;
+  --accent-glow: rgba(201,168,76,0.15);
+  --border: #2a2e3e;
+  --success: #66bb6a;
+  --danger: #ef5350;
+  --danger-soft: rgba(239,83,80,0.12);
+  --warning: #ffa726;
+}
+[data-theme="light"] {
+  --bg: #f5f3ee;
+  --bg-card: #ffffff;
+  --bg-input: #f0ede6;
+  --bg-hover: #e8e5de;
+  --text: #2c2c2c;
+  --text-muted: #6b6b6b;
+  --text-dim: #999;
+  --accent: #b8942f;
+  --accent-glow: rgba(184,148,47,0.1);
+  --border: #ddd8ce;
+  --success: #4caf50;
+  --danger: #e53935;
+  --danger-soft: rgba(229,57,53,0.08);
+  --warning: #f57c00;
+}
+
+/* ========== Reset & Base ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ========== Typography ========== */
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; }
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+p, li, label, input, select, textarea, button { font-size: 1rem; line-height: 1.5; }
+
+/* ========== Layout ========== */
+.app-container {
+  flex: 1;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 16px 100px;
+}
+@media (min-width: 768px) {
+  .app-container { padding: 24px 24px 24px; }
+}
+
+/* ========== Header ========== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 16px;
+}
+.app-header h1 { font-size: 1.6rem; color: var(--accent); }
+.theme-toggle {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 50%;
+  width: 44px; height: 44px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+}
+.theme-toggle:hover { background: var(--bg-hover); }
+
+/* ========== Tab Navigation ========== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 4px;
+  border: 1px solid var(--border);
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
+}
+@media (min-width: 768px) {
+  .tab-bar {
+    position: static;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+}
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 10px 4px;
+  min-height: var(--min-touch);
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all var(--transition);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.tab-btn .tab-icon { font-size: 1.3rem; }
+.tab-btn.active { background: var(--accent-glow); color: var(--accent); font-weight: 600; }
+.tab-btn:hover:not(.active) { background: var(--bg-hover); }
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== Cards ========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  transition: all var(--transition);
+}
+
+/* ========== Quote ========== */
+.quote-card {
+  text-align: center;
+  padding: 20px;
+  background: var(--accent-glow);
+  border: 1px solid rgba(201,168,76,0.2);
+}
+.quote-text {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.quote-author { font-size: 0.9rem; color: var(--accent); }
+
+/* ========== Streak & Stats Bar ========== */
+.stats-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.stat-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.stat-chip .num { font-weight: 600; color: var(--accent); }
+
+/* ========== Week Dots ========== */
+.week-dots {
+  display: flex; gap: 6px; align-items: center;
+}
+.week-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  transition: all var(--transition);
+}
+.week-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+.week-dot-label { font-size: 0.7rem; color: var(--text-dim); }
+
+/* ========== Progress Bar ========== */
+.progress-wrap { margin-bottom: 12px; }
+.progress-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px; }
+.progress-bar {
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #e0c068);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* ========== Overdue Banner ========== */
+.overdue-banner {
+  background: var(--danger-soft);
+  border: 1px solid rgba(239,83,80,0.2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: var(--text);
+  display: none;
+}
+.overdue-banner.visible { display: block; }
+
+/* ========== Inputs ========== */
+input[type="text"], input[type="date"], select, textarea {
+  width: 100%;
+  min-height: var(--input-height);
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: border-color var(--transition);
+  outline: none;
+}
+input::placeholder, textarea::placeholder { color: var(--text-dim); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+textarea { min-height: 80px; resize: vertical; }
+
+/* ========== Buttons ========== */
+.btn {
+  min-height: var(--btn-height);
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #141821; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary { background: var(--bg-input); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg-hover); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); }
+.btn-danger:hover { filter: brightness(1.1); }
+.btn-small { min-height: 38px; padding: 8px 14px; font-size: 0.9rem; }
+.btn-icon {
+  width: 40px; min-height: 40px; padding: 0;
+  background: transparent; color: var(--text-muted);
+  border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; transition: all var(--transition);
+}
+.btn-icon:hover { background: var(--bg-hover); color: var(--text); }
+
+/* ========== Quick Add ========== */
+.quick-add {
+  display: flex; gap: 8px;
+  margin-bottom: 12px;
+}
+.quick-add input { flex: 1; }
+
+/* ========== Filters ========== */
+.filters {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.filters select { width: auto; min-width: 140px; min-height: 42px; }
+.filter-btn {
+  min-height: 42px; padding: 8px 14px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-family: var(--font-body); font-size: 0.9rem;
+  cursor: pointer; transition: all var(--transition);
+}
+.filter-btn.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+.filter-btn:hover:not(.active) { background: var(--bg-hover); }
+
+/* ========== Task Item ========== */
+.task-list { list-style: none; }
+.task-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 14px 17px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--border);
+  transition: all var(--transition);
+  cursor: grab;
+  position: relative;
+}
+.task-item:active { cursor: grabbing; }
+.task-item.dragging { opacity: 0.5; transform: scale(0.98); }
+.task-item.drag-over { border-top: 2px solid var(--accent); }
+.task-item.cat-rossbacher { border-left-color: var(--cat-rossbacher); }
+.task-item.cat-ki { border-left-color: var(--cat-ki); }
+.task-item.cat-kreativ { border-left-color: var(--cat-kreativ); }
+.task-item.cat-familie { border-left-color: var(--cat-familie); }
+.task-item.cat-persoenlich { border-left-color: var(--cat-persoenlich); }
+.task-item.done { opacity: 0.5; }
+.task-item.done .task-title { text-decoration: line-through; }
+.task-item.quick-mark { border-top: 2px solid var(--warning); }
+
+.task-header {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.task-checkbox-wrap {
+  flex-shrink: 0;
+  width: var(--checkbox-touch); height: var(--checkbox-touch);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.task-checkbox {
+  width: var(--checkbox-size); height: var(--checkbox-size);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.task-checkbox.checked {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.task-checkbox.checked::after { content: '✓'; font-size: 16px; font-weight: 600; }
+.task-body { flex: 1; min-width: 0; }
+.task-title { font-weight: 500; font-size: 1rem; word-break: break-word; }
+.task-meta {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  align-items: center;
+}
+.task-badge {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+.task-badge.prio-high { background: rgba(239,83,80,0.15); color: #ef5350; }
+.task-badge.prio-medium { background: rgba(255,167,38,0.15); color: #ffa726; }
+.task-badge.prio-low { background: rgba(102,187,106,0.15); color: #66bb6a; }
+.task-badge.overdue { background: rgba(239,83,80,0.2); color: #ef5350; }
+.task-desc {
+  font-size: 0.9rem; color: var(--text-muted);
+  margin-top: 6px; word-break: break-word;
+}
+.task-actions {
+  display: flex; gap: 2px; flex-shrink: 0;
+}
+.task-hint {
+  font-size: 0.82rem; color: var(--text-dim);
+  font-style: italic; margin-top: 8px; padding: 6px 10px;
+  background: var(--accent-glow); border-radius: var(--radius-sm);
+}
+
+/* ========== Subtasks ========== */
+.subtask-section { margin-top: 10px; padding-left: 4px; }
+.subtask-progress { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
+.subtask-list { list-style: none; }
+.subtask-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0; font-size: 0.92rem;
+}
+.subtask-cb-wrap {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.subtask-cb {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.subtask-cb.checked { background: var(--success); border-color: var(--success); color: #fff; }
+.subtask-cb.checked::after { content: '✓'; font-size: 13px; font-weight: 600; }
+.subtask-text.done { text-decoration: line-through; color: var(--text-dim); }
+.subtask-del {
+  background: none; border: none; color: var(--text-dim); cursor: pointer;
+  font-size: 1rem; padding: 4px; margin-left: auto;
+}
+.subtask-del:hover { color: var(--danger); }
+.subtask-add {
+  display: flex; gap: 6px; margin-top: 6px;
+}
+.subtask-add input { min-height: 38px; font-size: 0.9rem; }
+
+/* ========== Task Form (Modal-like) ========== */
+.task-form-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: flex-end; justify-content: center;
+}
+.task-form-overlay.open { display: flex; }
+@media (min-width: 768px) {
+  .task-form-overlay.open { align-items: center; }
+}
+.task-form {
+  background: var(--bg-card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 20px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@media (min-width: 768px) {
+  .task-form { border-radius: var(--radius); }
+}
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.task-form h3 { margin-bottom: 14px; color: var(--accent); }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px; }
+.form-row { display: flex; gap: 8px; }
+.form-row > * { flex: 1; }
+.form-actions { display: flex; gap: 8px; margin-top: 16px; }
+.form-actions .btn { flex: 1; }
+
+/* ========== Shopping List ========== */
+.shop-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  border-left: 3px solid var(--shop-sonstiges);
+  transition: all var(--transition);
+}
+.shop-item.checked { opacity: 0.45; }
+.shop-item.checked .shop-name { text-decoration: line-through; }
+.shop-item.cat-obst { border-left-color: var(--shop-obst); }
+.shop-item.cat-milch { border-left-color: var(--shop-milch); }
+.shop-item.cat-fleisch { border-left-color: var(--shop-fleisch); }
+.shop-item.cat-brot { border-left-color: var(--shop-brot); }
+.shop-item.cat-trocken { border-left-color: var(--shop-trocken); }
+.shop-item.cat-haushalt { border-left-color: var(--shop-haushalt); }
+.shop-item.cat-tk { border-left-color: var(--shop-tk); }
+.shop-name { flex: 1; font-size: 1rem; }
+.shop-qty { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+
+/* ========== Packing Lists ========== */
+.pack-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}
+.pack-template-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text);
+  min-height: 80px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+}
+.pack-template-btn .pack-icon { font-size: 1.6rem; }
+.pack-template-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+.pack-template-btn.active { border-color: var(--accent); background: var(--accent-glow); }
+
+.pack-section-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin: 14px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.pack-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+}
+.pack-cb-wrap {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.pack-cb {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.pack-cb.checked { background: var(--success); border-color: var(--success); color: #fff; }
+.pack-cb.checked::after { content: '✓'; font-size: 14px; font-weight: 600; }
+.pack-text.done { text-decoration: line-through; color: var(--text-dim); }
+.pack-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1rem; padding: 4px; margin-left: auto; }
+.pack-del:hover { color: var(--danger); }
+
+/* ========== Stats ========== */
+.stat-card { padding: 20px; text-align: center; }
+.stat-card .big-num { font-size: 2.5rem; font-weight: 600; color: var(--accent); font-family: var(--font-heading); }
+.stat-card .stat-label { font-size: 0.9rem; color: var(--text-muted); }
+.bar-chart { display: flex; gap: 8px; align-items: flex-end; height: 120px; padding: 0 10px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar-fill {
+  width: 100%; border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+.bar-label { font-size: 0.7rem; color: var(--text-dim); text-align: center; }
+.bar-value { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.stat-message {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 16px;
+}
+
+/* ========== Confetti ========== */
+.confetti-container {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+.confetti-piece {
+  position: absolute;
+  width: 10px; height: 10px;
+  opacity: 0;
+  animation: confettiFall 1.5s ease forwards;
+}
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
+}
+
+/* ========== Data buttons ========== */
+.data-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.data-section .btn { margin-right: 8px; margin-bottom: 8px; }
+
+/* ========== Misc ========== */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 8px; }
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.stamm-grid {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.stamm-btn {
+  padding: 8px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.stamm-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div class="app-container">
+  <header class="app-header">
+    <h1>Luisas App</h1>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Theme wechseln">🌙</button>
+  </header>
+
+  <!-- ========== TAB NAV (Desktop: top) ========== -->
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" onclick="switchTab('tasks')" data-tab="tasks">
+      <span class="tab-icon">📋</span> Aufgaben
+    </button>
+    <button class="tab-btn" onclick="switchTab('shopping')" data-tab="shopping">
+      <span class="tab-icon">🛒</span> Einkaufen
+    </button>
+    <button class="tab-btn" onclick="switchTab('packing')" data-tab="packing">
+      <span class="tab-icon">🎒</span> Packen
+    </button>
+    <button class="tab-btn" onclick="switchTab('stats')" data-tab="stats">
+      <span class="tab-icon">📊</span> Übersicht
+    </button>
+  </nav>
+
+  <!-- ==================== TAB 1: AUFGABEN ==================== -->
+  <div class="tab-content active" id="tab-tasks">
+
+    <!-- Tagesspruch -->
+    <div class="card quote-card" id="quoteCard">
+      <div class="quote-text" id="quoteText"></div>
+      <div class="quote-author" id="quoteAuthor"></div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-chip" id="streakChip">🔥 <span class="num" id="streakNum">0</span> Tage</div>
+      <div class="stat-chip" id="todayChip">📋 Heute: <span class="num" id="todayProgress">0/0</span></div>
+      <div class="stat-chip">
+        <div class="week-dots" id="weekDots"></div>
+      </div>
+    </div>
+
+    <!-- Day Progress -->
+    <div class="progress-wrap" id="dayProgressWrap">
+      <div class="progress-label" id="dayProgressLabel"></div>
+      <div class="progress-bar"><div class="progress-fill" id="dayProgressFill"></div></div>
+    </div>
+
+    <!-- Overdue Banner -->
+    <div class="overdue-banner" id="overdueBanner"></div>
+
+    <!-- Quick Add -->
+    <div class="quick-add">
+      <input type="text" id="quickAddInput" placeholder="Neue Aufgabe... (r: k: ki: f: p: Shortcuts)" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" onclick="quickAddTask()">+</button>
+      <button class="btn btn-secondary" onclick="openTaskForm()">⋯</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <select id="filterCat" onchange="renderTasks()" autocomplete="off">
+        <option value="">Alle Kategorien</option>
+        <option value="rossbacher">🏢 Rossbacher</option>
+        <option value="ki">🤖 KI & Lernen</option>
+        <option value="kreativ">📖 Kreativ</option>
+        <option value="familie">👨‍👩‍👧 Familie</option>
+        <option value="persoenlich">🧘 Persönlich</option>
+      </select>
+      <select id="filterPrio" onchange="renderTasks()" autocomplete="off">
+        <option value="">Alle Prioritäten</option>
+        <option value="high">🔴 Hoch</option>
+        <option value="medium">🟡 Mittel</option>
+        <option value="low">🟢 Niedrig</option>
+      </select>
+      <button class="filter-btn" id="focusBtn" onclick="toggleFocus()">🎯 Top 3</button>
+      <button class="filter-btn" id="quickTaskBtn" onclick="toggleQuickFilter()">⚡ 2 Min</button>
+      <select id="sortBy" onchange="renderTasks()" autocomplete="off">
+        <option value="manual">Manuell</option>
+        <option value="date">Nach Datum</option>
+        <option value="prio">Nach Priorität</option>
+      </select>
+    </div>
+
+    <!-- Two-minute hint -->
+    <div class="card hidden" id="twoMinHint" style="background:rgba(255,167,38,0.08);border-color:rgba(255,167,38,0.2);">
+      ⚡ Diese Aufgaben dauern unter 2 Minuten – mach sie jetzt!
+    </div>
+
+    <!-- Task List -->
+    <ul class="task-list" id="taskList"></ul>
+
+    <div class="empty-state hidden" id="emptyTasks">
+      <div class="empty-icon">📝</div>
+      <p>Noch keine Aufgaben – leg los!</p>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: EINKAUFEN ==================== -->
+  <div class="tab-content" id="tab-shopping">
+    <h2 class="section-title">🛒 Einkaufsliste</h2>
+
+    <div class="quick-add">
+      <input type="text" id="shopInput" placeholder="Artikel hinzufügen... (z.B. Milch 2x)" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" onclick="addShopItem()">+</button>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <button class="btn btn-secondary btn-small" onclick="toggleStamm()" id="stammToggle">📌 Übliche Artikel</button>
+      <button class="btn btn-secondary btn-small" onclick="copyShopList()">📋 Liste kopieren</button>
+      <button class="btn btn-danger btn-small" onclick="clearCheckedShop()">🗑️ Erledigte löschen</button>
+    </div>
+
+    <div class="stamm-grid hidden" id="stammGrid"></div>
+
+    <div id="shopList"></div>
+
+    <div class="empty-state hidden" id="emptyShop">
+      <div class="empty-icon">🛒</div>
+      <p>Einkaufsliste ist leer</p>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: PACKEN ==================== -->
+  <div class="tab-content" id="tab-packing">
+    <h2 class="section-title">🎒 Packlisten</h2>
+
+    <div class="pack-template-grid" id="packTemplateGrid"></div>
+
+    <div id="packListView" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 id="packListTitle" style="color:var(--accent);"></h3>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-small" onclick="resetPackList()">↩ Zurücksetzen</button>
+          <button class="btn btn-secondary btn-small" onclick="closePackList()">✕</button>
+        </div>
+      </div>
+      <div class="quick-add">
+        <input type="text" id="packAddInput" placeholder="Neues Item hinzufügen..." autocomplete="off" spellcheck="false">
+        <button class="btn btn-primary" onclick="addPackItem()">+</button>
+      </div>
+      <div id="packContent"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: ÜBERSICHT ==================== -->
+  <div class="tab-content" id="tab-stats">
+    <h2 class="section-title">📊 Wochenrückblick</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div class="card stat-card">
+        <div class="big-num" id="statWeekTotal">0</div>
+        <div class="stat-label">diese Woche erledigt</div>
+      </div>
+      <div class="card stat-card">
+        <div class="big-num" id="statStreak">🔥 0</div>
+        <div class="stat-label">Tage-Streak</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;color:var(--accent);">Erledigte Aufgaben pro Kategorie</h3>
+      <div class="bar-chart" id="catChart"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3 style="margin-bottom:12px;color:var(--accent);">Letzte 7 Tage</h3>
+      <div class="bar-chart" id="weekChart"></div>
+    </div>
+
+    <div class="stat-message" id="statMessage"></div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3 style="margin-bottom:8px;color:var(--accent);">Streak-Info</h3>
+      <p style="color:var(--text-muted);">Aktueller Streak: <strong id="statStreakCurrent">0</strong> Tage</p>
+      <p style="color:var(--text-muted);">Längster Streak: <strong id="statStreakMax">0</strong> Tage</p>
+    </div>
+
+    <!-- Data Export/Import -->
+    <div class="data-section">
+      <h3 style="margin-bottom:10px;color:var(--accent);">Daten</h3>
+      <button class="btn btn-secondary btn-small" onclick="exportData()">📤 Exportieren (JSON)</button>
+      <button class="btn btn-secondary btn-small" onclick="document.getElementById('importFile').click()">📥 Importieren</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+</div>
+
+<!-- Task Form Overlay -->
+<div class="task-form-overlay" id="taskFormOverlay" onclick="closeTaskFormOutside(event)">
+  <div class="task-form" id="taskForm">
+    <h3 id="taskFormTitle">Neue Aufgabe</h3>
+    <div class="form-group">
+      <label>Titel</label>
+      <input type="text" id="tfTitle" placeholder="Was steht an?" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="form-group">
+      <label>Beschreibung (optional)</label>
+      <textarea id="tfDesc" placeholder="Details..." autocomplete="off" spellcheck="false"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kategorie</label>
+        <select id="tfCat" autocomplete="off">
+          <option value="rossbacher">🏢 Rossbacher</option>
+          <option value="ki">🤖 KI & Lernen</option>
+          <option value="kreativ">📖 Kreativ</option>
+          <option value="familie">👨‍👩‍👧 Familie</option>
+          <option value="persoenlich">🧘 Persönlich</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priorität</label>
+        <select id="tfPrio" autocomplete="off">
+          <option value="medium">🟡 Mittel</option>
+          <option value="high">🔴 Hoch</option>
+          <option value="low">🟢 Niedrig</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Fällig am</label>
+      <input type="date" id="tfDate" autocomplete="off">
+    </div>
+    <input type="hidden" id="tfEditId">
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeTaskForm()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveTask()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+/* ===============================================================
+   LUISAS PRODUKTIVITÄTS-APP
+   =============================================================== */
+
+// ========== Quotes ==========
+const QUOTES = [
+  ["Jenseits von richtig und falsch liegt ein Ort. Dort treffen wir uns.", "Rumi"],
+  ["Stille ist nicht leer. Sie ist voller Antworten.", "Rumi"],
+  ["Du bist nicht der Tropfen im Ozean. Du bist der Ozean im Tropfen.", "Rumi"],
+  ["Dein Herz kennt den Weg. Lauf in diese Richtung.", "Rumi"],
+  ["Die Wunde ist der Ort, an dem das Licht in dich eintritt.", "Rumi"],
+  ["Was du suchst, das sucht auch dich.", "Rumi"],
+  ["Lebe still, und die Stille wird dir Antwort geben.", "Rumi"],
+  ["Sei still. Und wisse: Ich bin.", "Psalm 46"],
+  ["Das, was du suchst, ist das, was sucht.", "Meister Eckhart"],
+  ["Wäre das Auge nicht sonnenhaft, die Sonne könnt' es nie erblicken.", "Meister Eckhart"],
+  ["Der Verstand ist ein wunderbarer Diener, aber ein furchtbarer Herr.", "Robin Sharma"],
+  ["Wer sein Selbst kennt, kennt den Herrn.", "Ramana Maharshi"],
+  ["Dein eigenes Selbst-Sein ist dein Meister.", "Ramana Maharshi"],
+  ["Stille ist die Sprache Gottes. Alles andere ist eine schlechte Übersetzung.", "Ramana Maharshi"],
+  ["Glück ist deine Natur. Es ist kein Fehler, danach zu streben.", "Ramana Maharshi"],
+  ["In der Stille liegt die Kraft.", "Laozi"],
+  ["Eine Reise von tausend Meilen beginnt mit einem einzigen Schritt.", "Laozi"],
+  ["Wenn du loslässt, hast du beide Hände frei.", "Laozi"],
+  ["Wer andere kennt, ist klug. Wer sich selbst kennt, ist weise.", "Laozi"],
+  ["Die Wahrheit braucht keine Verteidigung.", "Nisargadatta Maharaj"],
+  ["Weisheit sagt mir, ich bin nichts. Liebe sagt mir, ich bin alles.", "Nisargadatta Maharaj"],
+  ["Das Bewusstsein ist das einzige Kapital, das nie verloren geht.", "Sri Aurobindo"],
+  ["Alles Leben ist Yoga.", "Sri Aurobindo"],
+  ["Lächle, atme und gehe langsam.", "Thich Nhat Hanh"],
+  ["Trinke deinen Tee langsam und ehrfürchtig, als wäre es die Achse, um die sich die Erde dreht.", "Thich Nhat Hanh"],
+  ["Der gegenwärtige Moment ist der einzige Moment, in dem Leben verfügbar ist.", "Thich Nhat Hanh"],
+  ["Jeder achtsame Schritt bringt uns dem Wunder des Lebens näher.", "Thich Nhat Hanh"],
+  ["Das Leid entsteht, wenn wir uns für getrennt halten.", "Eckhart Tolle"],
+  ["Wo immer du bist, sei ganz dort.", "Eckhart Tolle"],
+  ["Das Leben ist jetzt. Es gab nie eine Zeit, in der dein Leben nicht jetzt war.", "Eckhart Tolle"],
+  ["Du bist das Universum, das sich selbst erfährt.", "Eckhart Tolle"],
+  ["Sei wie ein Baum, und lass die toten Blätter fallen.", "Rumi"],
+  ["Der Mond bleibt hell, auch wenn der Hund ihn anbellt.", "Hafiz"],
+  ["Ich habe gelebt auf dem Saum meines Herzens, und das Leben fand ich dort.", "Hafiz"],
+  ["Wo die Angst ist, dort liegt die Freiheit.", "Kabir"],
+  ["Gehe in dich selbst und finde dort alles.", "Kabir"],
+  ["Jeder Tag ist eine neue Chance, das zu tun, was zählt.", ""],
+  ["Zwischen Reiz und Reaktion gibt es einen Raum. In diesem Raum liegt unsere Freiheit.", "Viktor Frankl"],
+  ["Was sich wandelt, bist nicht du. Du bist das, worin sich alles wandelt.", "Mooji"],
+  ["Ruhe ist nicht die Abwesenheit von Aktivität, sondern die Gegenwart von Frieden.", ""],
+  ["Du musst nicht alles auf einmal schaffen. Nur den nächsten Schritt.", ""],
+  ["Die Klarheit kommt in der Stille zwischen den Gedanken.", ""],
+  ["Vertraue dem Weg, auch wenn du das Ziel noch nicht siehst.", ""],
+  ["Nichts, was echte Substanz hat, kann je verloren gehen.", ""],
+  ["Erlaube dir, langsam zu sein. In der Langsamkeit liegt Tiefe.", ""]
+];
+
+// ========== Category Config ==========
+const CATEGORIES = {
+  rossbacher: { label: '🏢 Rossbacher', color: 'var(--cat-rossbacher)' },
+  ki: { label: '🤖 KI & Lernen', color: 'var(--cat-ki)' },
+  kreativ: { label: '📖 Kreativ', color: 'var(--cat-kreativ)' },
+  familie: { label: '👨‍👩‍👧 Familie', color: 'var(--cat-familie)' },
+  persoenlich: { label: '🧘 Persönlich', color: 'var(--cat-persoenlich)' }
+};
+const CAT_SHORTCUTS = { 'r:': 'rossbacher', 'ki:': 'ki', 'k:': 'kreativ', 'f:': 'familie', 'p:': 'persoenlich' };
+
+// ========== Shop Category Mapping ==========
+const SHOP_CATEGORIES = {
+  obst: { label: '🍎 Obst & Gemüse', keywords: ['apfel','äpfel','birne','banane','bananen','orange','orangen','tomate','tomaten','gurke','salat','kartoffel','kartoffeln','zwiebel','zwiebeln','paprika','zucchini','karotte','karotten','brokkoli','spinat','trauben','erdbeeren','heidelbeeren','avocado','mango','kiwi','ananas','zitrone','zitronen','knoblauch','pilze','champignons'] },
+  milch: { label: '🥛 Milchprodukte', keywords: ['milch','butter','käse','joghurt','sahne','quark','frischkäse','schmand','skyr','mascarpone','mozzarella','parmesan','gouda','emmentaler','buttermilch','schlagsahne','sauerrahm','crème fraîche'] },
+  fleisch: { label: '🥩 Fleisch & Fisch', keywords: ['fleisch','huhn','hähnchen','rind','schwein','lachs','fisch','wurst','schinken','speck','hack','hackfleisch','salami','thunfisch','garnelen','pute','truthahn'] },
+  brot: { label: '🍞 Brot & Backwaren', keywords: ['brot','brötchen','semmel','toast','croissant','brezel','kuchen','mehl','hefe','backpulver','tortilla','wrap','baguette'] },
+  trocken: { label: '🥫 Trockenwaren', keywords: ['nudeln','reis','pasta','spaghetti','linsen','bohnen','kichererbsen','haferflocken','müsli','zucker','salz','pfeffer','öl','olivenöl','essig','senf','ketchup','soja','dose','konserve','nüsse','mandeln','rosinen','couscous','bulgur'] },
+  haushalt: { label: '🧴 Haushalt', keywords: ['spülmittel','waschmittel','toilettenpapier','küchenrolle','seife','shampoo','duschgel','zahnpasta','deo','creme','taschentücher','müllbeutel','schwamm','reiniger','weichspüler'] },
+  tk: { label: '❄️ Tiefkühl', keywords: ['tiefkühl','eis','pizza','pommes','tk-','gefrorene','fischstäbchen'] },
+  sonstiges: { label: '📦 Sonstiges', keywords: [] }
+};
+
+const STAMM_ARTICLES = ['Milch','Brot','Butter','Eier','Bananen','Äpfel','Nudeln','Reis','Joghurt','Käse','Tomaten','Gurke','Kartoffeln','Zwiebeln','Haferflocken','Olivenöl'];
+
+// ========== Packing Templates ==========
+const PACK_TEMPLATES = [
+  { id: 'urlaub', icon: '🧳', name: 'Urlaub', sections: {
+    'Kleidung': ['T-Shirts','Hosen','Unterwäsche','Socken','Pyjama','Jacke','Badekleidung','Schuhe'],
+    'Hygiene': ['Zahnbürste','Zahnpasta','Shampoo','Deo','Sonnencreme','Medikamente'],
+    'Dokumente': ['Reisepass/Ausweis','Versicherungskarte','Buchungsbestätigungen'],
+    'Technik': ['Ladekabel','Powerbank','Kopfhörer'],
+    'Für Letizia': ['Kuscheltier','Malbuch','Snacks','Wechselkleidung']
+  }},
+  { id: 'ausflug', icon: '🏔️', name: 'Tagesausflug', sections: {
+    'Essentials': ['Rucksack','Wasserflasche','Snacks','Sonnencreme','Sonnenbrille','Erste-Hilfe-Set','Taschentücher','Handy + Ladekabel'],
+    'Je nach Wetter': ['Regenjacke','Mütze','Handschuhe','Sonnenhut'],
+    'Für Letizia': ['Wechselkleidung','Snacks','Trinkflasche','Spielzeug']
+  }},
+  { id: 'kindergarten', icon: '🎒', name: 'Kindergarten Letizia', sections: {
+    'Jeden Tag': ['Rucksack','Jause/Brotdose','Trinkflasche','Wechselkleidung','Hausschuhe'],
+    'Bei Bedarf': ['Regenkleidung','Sonnenhut','Gummistiefel','Kuscheltier']
+  }},
+  { id: 'geschaeft', icon: '💼', name: 'Geschäftsreise', sections: {
+    'Dokumente': ['Laptop','Ladekabel','Visitenkarten','Notizbuch','Unterlagen/Präsentation'],
+    'Kleidung': ['Business-Outfit','Schuhe','Unterwäsche','Pyjama'],
+    'Hygiene': ['Zahnbürste','Zahnpasta','Deo','Kamm'],
+    'Technik': ['Handy-Ladekabel','Powerbank','Kopfhörer','USB-Stick']
+  }}
+];
+
+// ========== State ==========
+let state = {
+  tasks: [],
+  shopping: [],
+  packLists: {},
+  streak: { current: 0, max: 0, lastDate: null },
+  completionLog: {},
+  focusMode: false,
+  quickFilter: false,
+  activePackList: null,
+  theme: 'dark'
+};
+
+// ========== Init ==========
+function init() {
+  loadState();
+  renderQuote();
+  renderWeekDots();
+  renderTasks();
+  updateStats();
+  renderShopList();
+  renderPackTemplates();
+  initStammGrid();
+  applyTheme();
+  setupKeyListeners();
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('luisa-app-state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+    }
+  } catch(e) { console.warn('State load error', e); }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('luisa-app-state', JSON.stringify(state));
+  } catch(e) { console.warn('State save error', e); }
+}
+
+// ========== Theme ==========
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  saveState();
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.querySelector('.theme-toggle').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ========== Tabs ==========
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if (tab === 'stats') renderStatsTab();
+}
+
+// ========== Quote ==========
+function renderQuote() {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const q = QUOTES[dayOfYear % QUOTES.length];
+  document.getElementById('quoteText').textContent = '„' + q[0] + '"';
+  document.getElementById('quoteAuthor').textContent = q[1] ? '– ' + q[1] : '';
+}
+
+// ========== Streak ==========
+function updateStreak() {
+  const today = todayStr();
+  if (!state.completionLog[today]) state.completionLog[today] = 0;
+
+  if (state.streak.lastDate === today) return;
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = dateStr(yesterday);
+
+  if (state.streak.lastDate === yStr) {
+    state.streak.current++;
+  } else if (state.streak.lastDate !== today) {
+    state.streak.current = 1;
+  }
+  state.streak.lastDate = today;
+  if (state.streak.current > state.streak.max) state.streak.max = state.streak.current;
+  saveState();
+}
+
+function renderStreakUI() {
+  const el = document.getElementById('streakNum');
+  el.textContent = state.streak.current;
+}
+
+// ========== Week Dots ==========
+function renderWeekDots() {
+  const container = document.getElementById('weekDots');
+  const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const now = new Date();
+  const dayOfWeek = (now.getDay() + 6) % 7;
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - dayOfWeek + i);
+    const ds = dateStr(d);
+    const active = (state.completionLog[ds] && state.completionLog[ds] > 0) ? 'active' : '';
+    html += `<div style="text-align:center"><div class="week-dot ${active}"></div><div class="week-dot-label">${days[i]}</div></div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ========== Tasks ==========
+function quickAddTask() {
+  const input = document.getElementById('quickAddInput');
+  let text = input.value.trim();
+  if (!text) return;
+
+  let cat = 'rossbacher';
+  for (const [prefix, catId] of Object.entries(CAT_SHORTCUTS)) {
+    if (text.toLowerCase().startsWith(prefix)) {
+      cat = catId;
+      text = text.substring(prefix.length).trim();
+      break;
+    }
+  }
+
+  const task = {
+    id: genId(),
+    title: text,
+    desc: '',
+    cat: cat,
+    prio: 'medium',
+    due: '',
+    done: false,
+    doneDate: null,
+    quickTask: false,
+    subtasks: [],
+    createdAt: Date.now()
+  };
+  state.tasks.unshift(task);
+  input.value = '';
+  saveState();
+  renderTasks();
+  updateStats();
+}
+
+function openTaskForm(editId) {
+  const overlay = document.getElementById('taskFormOverlay');
+  overlay.classList.add('open');
+  if (editId) {
+    const t = state.tasks.find(t => t.id === editId);
+    if (!t) return;
+    document.getElementById('taskFormTitle').textContent = 'Aufgabe bearbeiten';
+    document.getElementById('tfTitle').value = t.title;
+    document.getElementById('tfDesc').value = t.desc || '';
+    document.getElementById('tfCat').value = t.cat;
+    document.getElementById('tfPrio').value = t.prio;
+    document.getElementById('tfDate').value = t.due || '';
+    document.getElementById('tfEditId').value = editId;
+  } else {
+    document.getElementById('taskFormTitle').textContent = 'Neue Aufgabe';
+    document.getElementById('tfTitle').value = '';
+    document.getElementById('tfDesc').value = '';
+    document.getElementById('tfCat').value = 'rossbacher';
+    document.getElementById('tfPrio').value = 'medium';
+    document.getElementById('tfDate').value = '';
+    document.getElementById('tfEditId').value = '';
+  }
+  setTimeout(() => document.getElementById('tfTitle').focus(), 100);
+}
+
+function closeTaskForm() {
+  document.getElementById('taskFormOverlay').classList.remove('open');
+}
+
+function closeTaskFormOutside(e) {
+  if (e.target === document.getElementById('taskFormOverlay')) closeTaskForm();
+}
+
+function saveTask() {
+  const title = document.getElementById('tfTitle').value.trim();
+  if (!title) return;
+  const editId = document.getElementById('tfEditId').value;
+
+  if (editId) {
+    const t = state.tasks.find(t => t.id === editId);
+    if (t) {
+      t.title = title;
+      t.desc = document.getElementById('tfDesc').value.trim();
+      t.cat = document.getElementById('tfCat').value;
+      t.prio = document.getElementById('tfPrio').value;
+      t.due = document.getElementById('tfDate').value;
+    }
+  } else {
+    state.tasks.unshift({
+      id: genId(),
+      title: title,
+      desc: document.getElementById('tfDesc').value.trim(),
+      cat: document.getElementById('tfCat').value,
+      prio: document.getElementById('tfPrio').value,
+      due: document.getElementById('tfDate').value,
+      done: false,
+      doneDate: null,
+      quickTask: false,
+      subtasks: [],
+      createdAt: Date.now()
+    });
+  }
+  closeTaskForm();
+  saveState();
+  renderTasks();
+  updateStats();
+}
+
+function toggleTaskDone(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  t.doneDate = t.done ? Date.now() : null;
+
+  if (t.done) {
+    const today = todayStr();
+    if (!state.completionLog[today]) state.completionLog[today] = 0;
+    state.completionLog[today]++;
+    updateStreak();
+    spawnConfetti(12);
+
+    // Check if all today's tasks done
+    const todayTasks = state.tasks.filter(t => t.due === today);
+    if (todayTasks.length > 0 && todayTasks.every(t => t.done)) {
+      setTimeout(() => {
+        spawnConfetti(40);
+        showCelebration();
+      }, 400);
+    }
+  }
+  saveState();
+  renderTasks();
+  updateStats();
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  saveState();
+  renderTasks();
+  updateStats();
+}
+
+function toggleQuickTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (t) { t.quickTask = !t.quickTask; saveState(); renderTasks(); }
+}
+
+function toggleFocus() {
+  state.focusMode = !state.focusMode;
+  document.getElementById('focusBtn').classList.toggle('active', state.focusMode);
+  renderTasks();
+}
+
+function toggleQuickFilter() {
+  state.quickFilter = !state.quickFilter;
+  document.getElementById('quickTaskBtn').classList.toggle('active', state.quickFilter);
+  document.getElementById('twoMinHint').classList.toggle('hidden', !state.quickFilter);
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  const catFilter = document.getElementById('filterCat').value;
+  const prioFilter = document.getElementById('filterPrio').value;
+  const sortBy = document.getElementById('sortBy').value;
+
+  let tasks = [...state.tasks];
+
+  // Filters
+  if (catFilter) tasks = tasks.filter(t => t.cat === catFilter);
+  if (prioFilter) tasks = tasks.filter(t => t.prio === prioFilter);
+  if (state.quickFilter) tasks = tasks.filter(t => t.quickTask && !t.done);
+  if (state.focusMode) {
+    tasks = tasks.filter(t => !t.done);
+    const prioOrder = { high: 0, medium: 1, low: 2 };
+    tasks.sort((a, b) => {
+      const p = prioOrder[a.prio] - prioOrder[b.prio];
+      if (p !== 0) return p;
+      if (a.due && b.due) return a.due.localeCompare(b.due);
+      if (a.due) return -1;
+      if (b.due) return 1;
+      return 0;
+    });
+    tasks = tasks.slice(0, 3);
+  }
+
+  // Sort
+  if (sortBy === 'date') {
+    tasks.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      if (a.due && b.due) return a.due.localeCompare(b.due);
+      if (a.due) return -1;
+      if (b.due) return 1;
+      return 0;
+    });
+  } else if (sortBy === 'prio') {
+    const prioOrder = { high: 0, medium: 1, low: 2 };
+    tasks.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return prioOrder[a.prio] - prioOrder[b.prio];
+    });
+  } else {
+    // manual: done at bottom
+    tasks.sort((a, b) => a.done !== b.done ? (a.done ? 1 : -1) : 0);
+  }
+
+  const today = todayStr();
+
+  if (tasks.length === 0) {
+    list.innerHTML = '';
+    document.getElementById('emptyTasks').classList.remove('hidden');
+    if (state.focusMode) {
+      document.getElementById('emptyTasks').querySelector('p').textContent = 'Alles erledigt – gönn dir eine Pause!';
+    } else {
+      document.getElementById('emptyTasks').querySelector('p').textContent = 'Noch keine Aufgaben – leg los!';
+    }
+    return;
+  }
+  document.getElementById('emptyTasks').classList.add('hidden');
+
+  let html = '';
+  tasks.forEach(t => {
+    const catClass = 'cat-' + t.cat;
+    const doneClass = t.done ? 'done' : '';
+    const quickClass = t.quickTask && !t.done ? 'quick-mark' : '';
+    const isOverdue = t.due && t.due < today && !t.done;
+    const subtasksDone = t.subtasks ? t.subtasks.filter(s => s.done).length : 0;
+    const subtasksTotal = t.subtasks ? t.subtasks.length : 0;
+
+    html += `<li class="task-item ${catClass} ${doneClass} ${quickClass}" draggable="true" data-id="${t.id}"
+      ondragstart="dragStart(event)" ondragover="dragOver(event)" ondragend="dragEnd(event)" ondrop="dropTask(event)">
+      <div class="task-header">
+        <div class="task-checkbox-wrap" onclick="toggleTaskDone('${t.id}')">
+          <div class="task-checkbox ${t.done ? 'checked' : ''}"></div>
+        </div>
+        <div class="task-body">
+          <div class="task-title">${esc(t.title)}</div>
+          <div class="task-meta">
+            <span class="task-badge">${CATEGORIES[t.cat]?.label || t.cat}</span>
+            <span class="task-badge prio-${t.prio}">${t.prio === 'high' ? '🔴 Hoch' : t.prio === 'medium' ? '🟡 Mittel' : '🟢 Niedrig'}</span>
+            ${t.due ? `<span class="task-badge ${isOverdue ? 'overdue' : ''}">${isOverdue ? '⚠️ ' : '📅 '}${formatDate(t.due)}</span>` : ''}
+            ${subtasksTotal > 0 ? `<span class="task-badge">${subtasksDone}/${subtasksTotal} Schritte</span>` : ''}
+          </div>
+          ${t.desc ? `<div class="task-desc">${esc(t.desc)}</div>` : ''}
+        </div>
+        <div class="task-actions">
+          <button class="btn-icon" onclick="toggleQuickTask('${t.id}')" title="2-Minuten-Aufgabe">${t.quickTask ? '⚡' : '🕐'}</button>
+          <button class="btn-icon" onclick="openTaskForm('${t.id}')" title="Bearbeiten">✏️</button>
+          <button class="btn-icon" onclick="deleteTask('${t.id}')" title="Löschen">🗑️</button>
+        </div>
+      </div>`;
+
+    // Subtasks
+    if (!t.done) {
+      html += `<div class="subtask-section">`;
+      if (subtasksTotal > 0) {
+        html += `<div class="subtask-progress">${subtasksDone} von ${subtasksTotal} Schritten erledigt</div>`;
+        html += `<ul class="subtask-list">`;
+        t.subtasks.forEach((s, i) => {
+          html += `<li class="subtask-item">
+            <div class="subtask-cb-wrap" onclick="toggleSubtask('${t.id}', ${i})">
+              <div class="subtask-cb ${s.done ? 'checked' : ''}"></div>
+            </div>
+            <span class="subtask-text ${s.done ? 'done' : ''}">${esc(s.text)}</span>
+            <button class="subtask-del" onclick="deleteSubtask('${t.id}', ${i})">✕</button>
+          </li>`;
+        });
+        html += `</ul>`;
+      }
+      html += `<div class="subtask-add">
+        <input type="text" placeholder="Schritt hinzufügen..." onkeydown="if(event.key==='Enter')addSubtask('${t.id}',this)" autocomplete="off" spellcheck="false" style="min-height:38px;font-size:0.9rem;">
+        <button class="btn btn-secondary btn-small" onclick="addSubtask('${t.id}',this.previousElementSibling)">+</button>
+      </div>`;
+
+      // Hint for high-prio without subtasks
+      if (t.prio === 'high' && subtasksTotal === 0) {
+        html += `<div class="task-hint">💡 Tipp: Zerlege große Aufgaben in kleine Schritte – jeder Schritt gibt dir ein Erfolgsgefühl.</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</li>`;
+  });
+  list.innerHTML = html;
+
+  // Update day progress
+  updateDayProgress();
+  renderStreakUI();
+  renderWeekDots();
+  updateOverdueBanner();
+}
+
+// ========== Subtasks ==========
+function addSubtask(taskId, input) {
+  const text = input.value.trim();
+  if (!text) return;
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t) return;
+  if (!t.subtasks) t.subtasks = [];
+  t.subtasks.push({ text, done: false });
+  input.value = '';
+  saveState();
+  renderTasks();
+}
+
+function toggleSubtask(taskId, idx) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (t && t.subtasks[idx] !== undefined) {
+    t.subtasks[idx].done = !t.subtasks[idx].done;
+    saveState();
+    renderTasks();
+  }
+}
+
+function deleteSubtask(taskId, idx) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (t && t.subtasks) {
+    t.subtasks.splice(idx, 1);
+    saveState();
+    renderTasks();
+  }
+}
+
+// ========== Day Progress ==========
+function updateDayProgress() {
+  const today = todayStr();
+  const todayTasks = state.tasks.filter(t => t.due === today);
+  const done = todayTasks.filter(t => t.done).length;
+  const total = todayTasks.length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('todayProgress').textContent = `${done}/${total}`;
+  document.getElementById('dayProgressFill').style.width = pct + '%';
+
+  const label = document.getElementById('dayProgressLabel');
+  if (total === 0) {
+    label.textContent = 'Kein Druck heute – oder möchtest du dir etwas vornehmen?';
+  } else if (done === total) {
+    label.textContent = 'Alles geschafft! Du bist großartig. ✨';
+  } else {
+    label.textContent = `Heute ${done} von ${total} erledigt`;
+  }
+}
+
+// ========== Overdue ==========
+function updateOverdueBanner() {
+  const today = todayStr();
+  const overdue = state.tasks.filter(t => t.due && t.due < today && !t.done);
+  const banner = document.getElementById('overdueBanner');
+  if (overdue.length > 0) {
+    banner.textContent = `Du hast ${overdue.length} überfällige Aufgabe${overdue.length > 1 ? 'n' : ''} – kein Stress, aber vielleicht magst du eine davon heute angehen? 🌿`;
+    banner.classList.add('visible');
+  } else {
+    banner.classList.remove('visible');
+  }
+}
+
+// ========== Stats ==========
+function updateStats() {
+  renderStreakUI();
+  renderWeekDots();
+}
+
+function renderStatsTab() {
+  const now = new Date();
+  const dayOfWeek = (now.getDay() + 6) % 7;
+  const weekStart = new Date(now);
+  weekStart.setDate(weekStart.getDate() - dayOfWeek);
+
+  // Week total
+  let weekTotal = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    const ds = dateStr(d);
+    weekTotal += (state.completionLog[ds] || 0);
+  }
+  document.getElementById('statWeekTotal').textContent = weekTotal;
+  document.getElementById('statStreak').textContent = '🔥 ' + state.streak.current;
+  document.getElementById('statStreakCurrent').textContent = state.streak.current;
+  document.getElementById('statStreakMax').textContent = state.streak.max;
+
+  // Cat chart
+  const catCounts = {};
+  Object.keys(CATEGORIES).forEach(c => catCounts[c] = 0);
+  state.tasks.filter(t => t.done && t.doneDate).forEach(t => {
+    const d = new Date(t.doneDate);
+    const dStr = dateStr(d);
+    const wStart = dateStr(weekStart);
+    if (dStr >= wStart) catCounts[t.cat] = (catCounts[t.cat] || 0) + 1;
+  });
+  const maxCat = Math.max(1, ...Object.values(catCounts));
+  let catHtml = '';
+  Object.entries(CATEGORIES).forEach(([key, val]) => {
+    const h = Math.round((catCounts[key] / maxCat) * 100);
+    catHtml += `<div class="bar-col">
+      <div class="bar-value">${catCounts[key]}</div>
+      <div class="bar-fill" style="height:${h}%;background:${val.color};"></div>
+      <div class="bar-label">${val.label.split(' ')[0]}</div>
+    </div>`;
+  });
+  document.getElementById('catChart').innerHTML = catHtml;
+
+  // Week chart
+  const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  let weekHtml = '';
+  let maxDay = 1;
+  const dayCounts = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    const ds = dateStr(d);
+    const c = state.completionLog[ds] || 0;
+    dayCounts.push(c);
+    if (c > maxDay) maxDay = c;
+  }
+  dayCounts.forEach((c, i) => {
+    const h = Math.round((c / maxDay) * 100);
+    weekHtml += `<div class="bar-col">
+      <div class="bar-value">${c}</div>
+      <div class="bar-fill" style="height:${h}%;background:var(--accent);"></div>
+      <div class="bar-label">${days[i]}</div>
+    </div>`;
+  });
+  document.getElementById('weekChart').innerHTML = weekHtml;
+
+  // Message
+  const msg = document.getElementById('statMessage');
+  if (weekTotal >= 15) {
+    msg.textContent = 'Starke Woche! Vergiss nicht, auch Pausen sind produktiv. 🌿';
+  } else if (weekTotal <= 3) {
+    msg.textContent = 'Ruhige Woche – manchmal braucht man das. Nächste Woche wird\'s! 🌱';
+  } else {
+    msg.textContent = 'Schöne Balance diese Woche. ✨';
+  }
+}
+
+// ========== Drag & Drop ==========
+let draggedId = null;
+function dragStart(e) {
+  draggedId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function dragEnd(e) {
+  document.querySelectorAll('.task-item').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+function dropTask(e) {
+  e.preventDefault();
+  const targetId = e.currentTarget.dataset.id;
+  if (!draggedId || draggedId === targetId) return;
+  const fromIdx = state.tasks.findIndex(t => t.id === draggedId);
+  const toIdx = state.tasks.findIndex(t => t.id === targetId);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const [moved] = state.tasks.splice(fromIdx, 1);
+  state.tasks.splice(toIdx, 0, moved);
+  draggedId = null;
+  saveState();
+  renderTasks();
+}
+
+// ========== Shopping ==========
+function addShopItem() {
+  const input = document.getElementById('shopInput');
+  let text = input.value.trim();
+  if (!text) return;
+
+  // Parse quantity
+  let qty = '';
+  const qtyMatch = text.match(/\s+(\d+x?)$/i);
+  if (qtyMatch) {
+    qty = qtyMatch[1];
+    text = text.replace(qtyMatch[0], '').trim();
+  }
+
+  const cat = guessShopCat(text);
+
+  state.shopping.push({
+    id: genId(),
+    name: text,
+    qty: qty,
+    cat: cat,
+    checked: false
+  });
+  input.value = '';
+  saveState();
+  renderShopList();
+}
+
+function addShopItemDirect(name) {
+  const existing = state.shopping.find(s => s.name.toLowerCase() === name.toLowerCase() && !s.checked);
+  if (existing) return;
+  state.shopping.push({
+    id: genId(),
+    name: name,
+    qty: '',
+    cat: guessShopCat(name),
+    checked: false
+  });
+  saveState();
+  renderShopList();
+}
+
+function guessShopCat(name) {
+  const lower = name.toLowerCase();
+  for (const [catId, catData] of Object.entries(SHOP_CATEGORIES)) {
+    if (catData.keywords.some(kw => lower.includes(kw))) return catId;
+  }
+  return 'sonstiges';
+}
+
+function toggleShopItem(id) {
+  const item = state.shopping.find(s => s.id === id);
+  if (item) { item.checked = !item.checked; saveState(); renderShopList(); }
+}
+
+function deleteShopItem(id) {
+  state.shopping = state.shopping.filter(s => s.id !== id);
+  saveState();
+  renderShopList();
+}
+
+function clearCheckedShop() {
+  state.shopping = state.shopping.filter(s => !s.checked);
+  saveState();
+  renderShopList();
+}
+
+function copyShopList() {
+  const items = state.shopping.filter(s => !s.checked);
+  if (items.length === 0) return;
+  const text = items.map(s => `• ${s.name}${s.qty ? ' ' + s.qty : ''}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('[onclick="copyShopList()"]');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Kopiert!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+function renderShopList() {
+  const container = document.getElementById('shopList');
+  if (state.shopping.length === 0) {
+    container.innerHTML = '';
+    document.getElementById('emptyShop').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('emptyShop').classList.add('hidden');
+
+  // Sort: unchecked first, group by category
+  const unchecked = state.shopping.filter(s => !s.checked);
+  const checked = state.shopping.filter(s => s.checked);
+
+  // Group unchecked by category
+  const groups = {};
+  unchecked.forEach(s => {
+    if (!groups[s.cat]) groups[s.cat] = [];
+    groups[s.cat].push(s);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([cat, items]) => {
+    const catInfo = SHOP_CATEGORIES[cat] || SHOP_CATEGORIES.sonstiges;
+    html += `<div style="font-size:0.85rem;color:var(--text-muted);margin:10px 0 4px;font-weight:500;">${catInfo.label}</div>`;
+    items.forEach(s => {
+      html += renderShopItem(s);
+    });
+  });
+
+  if (checked.length > 0) {
+    html += `<div style="font-size:0.85rem;color:var(--text-dim);margin:14px 0 4px;">Erledigt (${checked.length})</div>`;
+    checked.forEach(s => { html += renderShopItem(s); });
+  }
+
+  container.innerHTML = html;
+}
+
+function renderShopItem(s) {
+  return `<div class="shop-item ${s.checked ? 'checked' : ''} cat-${s.cat}">
+    <div class="task-checkbox-wrap" onclick="toggleShopItem('${s.id}')">
+      <div class="task-checkbox ${s.checked ? 'checked' : ''}"></div>
+    </div>
+    <span class="shop-name">${esc(s.name)}</span>
+    ${s.qty ? `<span class="shop-qty">${esc(s.qty)}</span>` : ''}
+    <button class="btn-icon" onclick="deleteShopItem('${s.id}')" style="flex-shrink:0;">✕</button>
+  </div>`;
+}
+
+function toggleStamm() {
+  document.getElementById('stammGrid').classList.toggle('hidden');
+}
+
+function initStammGrid() {
+  const grid = document.getElementById('stammGrid');
+  grid.innerHTML = STAMM_ARTICLES.map(a => `<button class="stamm-btn" onclick="addShopItemDirect('${a}')">${a}</button>`).join('');
+}
+
+// ========== Packing ==========
+function renderPackTemplates() {
+  const grid = document.getElementById('packTemplateGrid');
+  let html = '';
+  PACK_TEMPLATES.forEach(t => {
+    const active = state.activePackList === t.id ? 'active' : '';
+    html += `<button class="pack-template-btn ${active}" onclick="openPackList('${t.id}')">
+      <span class="pack-icon">${t.icon}</span>
+      ${t.name}
+    </button>`;
+  });
+  // Custom lists
+  Object.keys(state.packLists).forEach(key => {
+    if (!PACK_TEMPLATES.find(t => t.id === key)) {
+      const active = state.activePackList === key ? 'active' : '';
+      html += `<button class="pack-template-btn ${active}" onclick="openPackList('${key}')">
+        <span class="pack-icon">📝</span>
+        ${key}
+        <span style="font-size:0.7rem;color:var(--text-dim);" onclick="event.stopPropagation();deleteCustomPackList('${key}')">🗑️</span>
+      </button>`;
+    }
+  });
+  html += `<button class="pack-template-btn" onclick="createCustomPackList()">
+    <span class="pack-icon">➕</span>
+    Eigene erstellen
+  </button>`;
+  grid.innerHTML = html;
+}
+
+function openPackList(id) {
+  state.activePackList = id;
+
+  // Init from template if not exists
+  if (!state.packLists[id]) {
+    const template = PACK_TEMPLATES.find(t => t.id === id);
+    if (template) {
+      state.packLists[id] = {};
+      Object.entries(template.sections).forEach(([section, items]) => {
+        state.packLists[id][section] = items.map(item => ({ text: item, checked: false }));
+      });
+      saveState();
+    }
+  }
+
+  document.getElementById('packListView').classList.remove('hidden');
+  const template = PACK_TEMPLATES.find(t => t.id === id);
+  document.getElementById('packListTitle').textContent = template ? `${template.icon} ${template.name}` : `📝 ${id}`;
+  renderPackList();
+  renderPackTemplates();
+}
+
+function closePackList() {
+  state.activePackList = null;
+  document.getElementById('packListView').classList.add('hidden');
+  renderPackTemplates();
+}
+
+function renderPackList() {
+  const id = state.activePackList;
+  if (!id || !state.packLists[id]) return;
+  const container = document.getElementById('packContent');
+  const data = state.packLists[id];
+
+  let html = '';
+  Object.entries(data).forEach(([section, items]) => {
+    const done = items.filter(i => i.checked).length;
+    html += `<div class="pack-section-title">${section} (${done}/${items.length})</div>`;
+    items.forEach((item, idx) => {
+      html += `<div class="pack-item">
+        <div class="pack-cb-wrap" onclick="togglePackItem('${section}', ${idx})">
+          <div class="pack-cb ${item.checked ? 'checked' : ''}"></div>
+        </div>
+        <span class="pack-text ${item.checked ? 'done' : ''}">${esc(item.text)}</span>
+        <button class="pack-del" onclick="deletePackItem('${section}', ${idx})">✕</button>
+      </div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+function togglePackItem(section, idx) {
+  const id = state.activePackList;
+  if (!id || !state.packLists[id]) return;
+  state.packLists[id][section][idx].checked = !state.packLists[id][section][idx].checked;
+  saveState();
+  renderPackList();
+}
+
+function deletePackItem(section, idx) {
+  const id = state.activePackList;
+  if (!id || !state.packLists[id]) return;
+  state.packLists[id][section].splice(idx, 1);
+  if (state.packLists[id][section].length === 0) delete state.packLists[id][section];
+  saveState();
+  renderPackList();
+}
+
+function addPackItem() {
+  const id = state.activePackList;
+  if (!id || !state.packLists[id]) return;
+  const input = document.getElementById('packAddInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const sections = Object.keys(state.packLists[id]);
+  const section = sections.length > 0 ? sections[sections.length - 1] : 'Sonstiges';
+  if (!state.packLists[id][section]) state.packLists[id][section] = [];
+  state.packLists[id][section].push({ text, checked: false });
+  input.value = '';
+  saveState();
+  renderPackList();
+}
+
+function resetPackList() {
+  const id = state.activePackList;
+  if (!id || !state.packLists[id]) return;
+  Object.values(state.packLists[id]).forEach(items => {
+    items.forEach(item => item.checked = false);
+  });
+  saveState();
+  renderPackList();
+}
+
+function createCustomPackList() {
+  const name = prompt('Name der neuen Packliste:');
+  if (!name || !name.trim()) return;
+  const key = name.trim();
+  if (!state.packLists[key]) {
+    state.packLists[key] = { 'Meine Sachen': [] };
+    saveState();
+  }
+  openPackList(key);
+}
+
+function deleteCustomPackList(key) {
+  if (!confirm(`Packliste "${key}" wirklich löschen?`)) return;
+  delete state.packLists[key];
+  if (state.activePackList === key) closePackList();
+  saveState();
+  renderPackTemplates();
+}
+
+// ========== Confetti ==========
+function spawnConfetti(count) {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#c9a84c', '#4a90d9', '#9b6dd7', '#d9739e', '#4ecdc4', '#66bb6a', '#ef5350', '#ffa726'];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = -10 + 'px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.animationDelay = (Math.random() * 0.4) + 's';
+    piece.style.animationDuration = (1 + Math.random() * 1) + 's';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 2500);
+  }
+}
+
+function showCelebration() {
+  // Brief overlay message
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9998;pointer-events:none;';
+  div.innerHTML = '<div style="background:var(--bg-card);border:2px solid var(--accent);border-radius:var(--radius);padding:24px 32px;text-align:center;font-family:var(--font-heading);font-size:1.4rem;color:var(--accent);box-shadow:var(--shadow-lg);animation:fadeIn 0.3s ease;">Alles geschafft! Du bist großartig. ✨</div>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2500);
+}
+
+// ========== Export / Import ==========
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'luisa-app-backup-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      state = { ...state, ...imported };
+      saveState();
+      renderTasks();
+      renderShopList();
+      renderPackTemplates();
+      updateStats();
+      alert('Daten erfolgreich importiert!');
+    } catch(err) {
+      alert('Fehler beim Importieren: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ========== Key Listeners ==========
+function setupKeyListeners() {
+  document.getElementById('quickAddInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') quickAddTask();
+  });
+  document.getElementById('shopInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addShopItem();
+  });
+  document.getElementById('packAddInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addPackItem();
+  });
+  document.getElementById('tfTitle').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveTask();
+  });
+}
+
+// ========== Auto-Save on close ==========
+window.addEventListener('beforeunload', () => saveState());
+
+// ========== Helpers ==========
+function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+function todayStr() { return dateStr(new Date()); }
+function dateStr(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function formatDate(ds) {
+  const [y, m, d] = ds.split('-');
+  return `${d}.${m}.${y}`;
+}
+function esc(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ========== Start ==========
+init();
+</script>
+</body>
+</html>
