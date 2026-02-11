@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luisas To-Do App</title>
+<style>
+/* ============================================
+   CSS Custom Properties & Theme
+   ============================================ */
+:root {
+  /* Dark theme (default) */
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: #1e2a4a;
+  --bg-input: #253456;
+  --bg-hover: #2a3f6e;
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a8c0;
+  --text-muted: #6b7394;
+  --accent: #d4a843;
+  --accent-hover: #e6bd5a;
+  --accent-glow: rgba(212, 168, 67, 0.15);
+  --border: #2d3a5c;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --danger: #e74c3c;
+  --danger-hover: #c0392b;
+  --success: #27ae60;
+  --streak-glow: rgba(255, 140, 0, 0.3);
+  --cat-rossbacher: #5dade2;
+  --cat-ki: #a78bfa;
+  --cat-kreativ: #f0a500;
+  --cat-familie: #e879a8;
+  --cat-persoenlich: #6dd5b0;
+  --prio-high: #e74c3c;
+  --prio-medium: #f1c40f;
+  --prio-low: #27ae60;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.25s ease;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f5f0e8;
+  --bg-secondary: #ede5d8;
+  --bg-card: #ffffff;
+  --bg-input: #f9f5ef;
+  --bg-hover: #f0ebe2;
+  --text-primary: #2c2c2c;
+  --text-secondary: #5a5a5a;
+  --text-muted: #8a8a8a;
+  --accent: #b8860b;
+  --accent-hover: #9a7209;
+  --accent-glow: rgba(184, 134, 11, 0.1);
+  --border: #ddd3c2;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --bg-hover: #f2ece3;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ============================================
+   Layout
+   ============================================ */
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 16px 100px;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.app-header {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.app-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ============================================
+   Daily Quote
+   ============================================ */
+.quote-card {
+  background: var(--accent-glow);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.quote-text {
+  font-style: italic;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.quote-author {
+  color: var(--accent);
+  font-size: 0.78rem;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ============================================
+   Stats Bar
+   ============================================ */
+.stats-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Progress bar */
+.progress-container {
+  background: var(--bg-secondary);
+  border-radius: 20px;
+  height: 8px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  min-width: 0;
+}
+
+/* Streak */
+.streak-value {
+  color: #ff8c00;
+}
+
+.streak-fire {
+  display: inline;
+}
+
+/* Week overview */
+.week-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.week-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all var(--transition);
+}
+
+.week-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.week-dot-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.week-dot-label span {
+  width: 10px;
+  text-align: center;
+}
+
+/* Overdue reminder */
+.overdue-reminder {
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.overdue-reminder.visible {
+  display: flex;
+}
+
+/* Celebration */
+.celebration-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.celebration-overlay.active {
+  opacity: 1;
+}
+
+.celebration-text {
+  font-size: 1.8rem;
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow);
+  animation: celebPulse 1s ease infinite;
+}
+
+@keyframes celebPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Confetti */
+.confetti {
+  position: fixed;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 1001;
+  pointer-events: none;
+  animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================
+   Controls Bar (Filters, Sort, Focus)
+   ============================================ */
+.controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.controls-bar select,
+.controls-bar button {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.controls-bar select:hover,
+.controls-bar button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.focus-btn {
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.focus-btn.active {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ============================================
+   Quick Add Bar
+   ============================================ */
+.quick-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.quick-add input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.quick-add input::placeholder {
+  color: var(--text-muted);
+}
+
+.quick-add input:focus {
+  border-color: var(--accent);
+}
+
+.quick-add button {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+
+.quick-add button:hover {
+  background: var(--accent-hover);
+}
+
+/* ============================================
+   Task Form (expanded)
+   ============================================ */
+.task-form-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.task-form-overlay.visible {
+  display: flex;
+}
+
+.task-form {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.task-form h3 {
+  color: var(--accent);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--accent);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.btn-primary {
+  flex: 1;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+}
+
+/* ============================================
+   Task List
+   ============================================ */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all var(--transition);
+  cursor: grab;
+  position: relative;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.task-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.task-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.task-item.drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.task-item.completed {
+  opacity: 0.5;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+}
+
+.task-item.completing {
+  animation: completeAnim 0.6s ease forwards;
+}
+
+@keyframes completeAnim {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.03); background: rgba(39, 174, 96, 0.1); }
+  100% { transform: scale(1); }
+}
+
+/* Checkbox */
+.task-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-size: 0.7rem;
+  color: transparent;
+}
+
+.task-check:hover {
+  border-color: var(--accent);
+}
+
+.task-item.completed .task-check {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+/* Task content */
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.task-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  word-break: break-word;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.task-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badge-category {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+}
+
+.badge-prio-high { color: var(--prio-high); }
+.badge-prio-medium { color: var(--prio-medium); }
+.badge-prio-low { color: var(--prio-low); }
+
+.badge-due {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.badge-overdue {
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
+/* Task actions */
+.task-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.task-actions button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: all var(--transition);
+}
+
+.task-actions button:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.task-actions .btn-delete:hover {
+  color: var(--danger);
+}
+
+/* Category colors on task border */
+.task-item[data-category="rossbacher"] { border-left: 3px solid var(--cat-rossbacher); }
+.task-item[data-category="ki"] { border-left: 3px solid var(--cat-ki); }
+.task-item[data-category="kreativ"] { border-left: 3px solid var(--cat-kreativ); }
+.task-item[data-category="familie"] { border-left: 3px solid var(--cat-familie); }
+.task-item[data-category="persoenlich"] { border-left: 3px solid var(--cat-persoenlich); }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state-text {
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   Import/Export Footer
+   ============================================ */
+.app-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.app-footer button {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.app-footer button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Hidden file input */
+#importInput {
+  display: none;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 600px) {
+  .app-container { padding: 12px 10px 80px; }
+  .app-title { font-size: 1.4rem; }
+  .stats-bar { grid-template-columns: 1fr; gap: 8px; }
+  .controls-bar { gap: 6px; }
+  .task-form { padding: 18px; }
+  .quick-add { flex-direction: column; }
+  .quick-add button { width: 100%; }
+}
+
+/* ============================================
+   Scrollbar styling
+   ============================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Category colors in filter select */
+.cat-color-rossbacher { color: var(--cat-rossbacher); }
+.cat-color-ki { color: var(--cat-ki); }
+.cat-color-kreativ { color: var(--cat-kreativ); }
+.cat-color-familie { color: var(--cat-familie); }
+.cat-color-persoenlich { color: var(--cat-persoenlich); }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <h1 class="app-title">Meine Aufgaben</h1>
+    <p class="app-subtitle">Hallo Luisa — ein Schritt nach dem anderen.</p>
+    <button class="theme-toggle" id="themeToggle" title="Theme wechseln">☀️</button>
+  </header>
+
+  <!-- Daily Quote -->
+  <div class="quote-card" id="quoteCard">
+    <div class="quote-text" id="quoteText"></div>
+    <div class="quote-author" id="quoteAuthor"></div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-value streak-value"><span class="streak-fire" id="streakFire">🔥</span> <span id="streakCount">0</span></div>
+      <div class="stat-label">Tage Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="todayProgress">0/0</div>
+      <div class="stat-label">Heute erledigt</div>
+      <div class="progress-container">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size: 1rem; margin-bottom: 2px;">Letzte 7 Tage</div>
+      <div class="stat-label" id="weekSummary">0 Aufgaben erledigt</div>
+      <div class="week-dots" id="weekDots"></div>
+      <div class="week-dot-label" id="weekLabels"></div>
+    </div>
+  </div>
+
+  <!-- Overdue Reminder -->
+  <div class="overdue-reminder" id="overdueReminder">
+    <span>💛</span>
+    <span id="overdueText">Du hast einige Aufgaben, die auf dich warten — kein Stress, eins nach dem anderen.</span>
+  </div>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar">
+    <select id="filterCategory">
+      <option value="all">Alle Kategorien</option>
+      <option value="rossbacher">🏢 Rossbacher</option>
+      <option value="ki">🤖 KI & Lernen</option>
+      <option value="kreativ">📖 Kreativ</option>
+      <option value="familie">👨‍👩‍👧 Familie</option>
+      <option value="persoenlich">🧘 Persönlich</option>
+    </select>
+    <select id="filterPriority">
+      <option value="all">Alle Prioritäten</option>
+      <option value="high">🔴 Hoch</option>
+      <option value="medium">🟡 Mittel</option>
+      <option value="low">🟢 Niedrig</option>
+    </select>
+    <select id="sortBy">
+      <option value="manual">Eigene Reihenfolge</option>
+      <option value="dueDate">Nach Fälligkeit</option>
+      <option value="priority">Nach Priorität</option>
+      <option value="created">Nach Erstellung</option>
+    </select>
+    <button class="focus-btn" id="focusBtn" title="Zeige nur die 3 wichtigsten Aufgaben">🎯 Fokus</button>
+  </div>
+
+  <!-- Quick Add -->
+  <div class="quick-add">
+    <input type="text" id="quickAddInput" placeholder="Neue Aufgabe hinzufügen…" autocomplete="off">
+    <button id="quickAddBtn">+ Hinzufügen</button>
+  </div>
+
+  <!-- Task List -->
+  <div class="task-list" id="taskList"></div>
+
+  <!-- Footer -->
+  <div class="app-footer">
+    <button onclick="exportTasks()">📥 Export (JSON)</button>
+    <button onclick="document.getElementById('importInput').click()">📤 Import (JSON)</button>
+    <input type="file" id="importInput" accept=".json" onchange="importTasks(event)">
+  </div>
+</div>
+
+<!-- Task Form Modal -->
+<div class="task-form-overlay" id="taskFormOverlay">
+  <div class="task-form" id="taskForm">
+    <h3 id="formTitle">Neue Aufgabe</h3>
+    <div class="form-group">
+      <label>Titel *</label>
+      <input type="text" id="formTitleInput" placeholder="Was muss erledigt werden?" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Beschreibung</label>
+      <textarea id="formDesc" placeholder="Optionale Details…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Kategorie</label>
+      <select id="formCategory">
+        <option value="rossbacher">🏢 Rossbacher</option>
+        <option value="ki">🤖 KI & Lernen</option>
+        <option value="kreativ">📖 Kreativ</option>
+        <option value="familie">👨‍👩‍👧 Familie</option>
+        <option value="persoenlich">🧘 Persönlich</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Priorität</label>
+      <select id="formPriority">
+        <option value="medium">🟡 Mittel</option>
+        <option value="high">🔴 Hoch</option>
+        <option value="low">🟢 Niedrig</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Fälligkeitsdatum</label>
+      <input type="date" id="formDueDate">
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeForm()">Abbrechen</button>
+      <button class="btn-primary" id="formSubmitBtn" onclick="submitForm()">Erstellen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Celebration Overlay -->
+<div class="celebration-overlay" id="celebrationOverlay">
+  <div class="celebration-text">✨ Alles erledigt — großartig! ✨</div>
+</div>
+
+<script>
+/* ============================================
+   Philosophical Quotes Collection
+   ============================================ */
+const QUOTES = [
+  { text: "Das Bewusstsein ist kein Ding unter Dingen, es ist der Horizont, der alle Dinge enthält.", author: "Edmund Husserl" },
+  { text: "Wer nach außen schaut, träumt. Wer nach innen schaut, erwacht.", author: "Carl Gustav Jung" },
+  { text: "Der Geist ist nicht ein Gefäß, das gefüllt, sondern ein Feuer, das entzündet werden will.", author: "Plutarch" },
+  { text: "In der Mitte des Schwierigkeiten liegt die Möglichkeit.", author: "Albert Einstein" },
+  { text: "Die Grenzen meiner Sprache bedeuten die Grenzen meiner Welt.", author: "Ludwig Wittgenstein" },
+  { text: "Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht zur Wahl.", author: "Viktor Frankl" },
+  { text: "Das Sein bestimmt das Bewusstsein — aber das Bewusstsein kann das Sein verändern.", author: "Frei nach Marx" },
+  { text: "Stille ist nicht die Abwesenheit von Etwas, sondern die Anwesenheit von Allem.", author: "Gordon Hempton" },
+  { text: "Was hinter uns liegt und was vor uns liegt, sind Kleinigkeiten im Vergleich zu dem, was in uns liegt.", author: "Ralph Waldo Emerson" },
+  { text: "Der einzige Weg, die Grenzen des Möglichen zu finden, ist, ein Stück über sie hinauszugehen ins Unmögliche.", author: "Arthur C. Clarke" },
+  { text: "Das Maß des Lebens ist nicht seine Dauer, sondern seine Tiefe.", author: "Ralph Waldo Emerson" },
+  { text: "Wandlung ist notwendig wie die Erneuerung der Blätter im Frühling.", author: "Vincent van Gogh" },
+  { text: "Alles, was wir sind, entsteht aus unseren Gedanken. Mit unseren Gedanken formen wir die Welt.", author: "Buddha" },
+  { text: "Der Verstand, der sich einer neuen Idee öffnet, kehrt nie zu seiner ursprünglichen Größe zurück.", author: "Oliver Wendell Holmes" },
+  { text: "Jeder Augenblick ist von unendlichem Wert, denn er ist der Vertreter einer ganzen Ewigkeit.", author: "Johann Wolfgang von Goethe" },
+  { text: "Die Fähigkeit, im gegenwärtigen Moment zu sein, ist eine Hauptkomponente mentaler Gesundheit.", author: "Abraham Maslow" },
+  { text: "Das Wesentliche ist für die Augen unsichtbar. Man sieht nur mit dem Herzen gut.", author: "Antoine de Saint-Exupéry" },
+  { text: "Wir sind nicht menschliche Wesen, die eine spirituelle Erfahrung machen, sondern spirituelle Wesen, die eine menschliche Erfahrung machen.", author: "Pierre Teilhard de Chardin" },
+  { text: "Der Weg ist das Ziel — aber nur, wenn du jeden Schritt bewusst gehst.", author: "Konfuzius" },
+  { text: "Nicht die Dinge selbst beunruhigen die Menschen, sondern die Urteile über die Dinge.", author: "Epiktet" },
+  { text: "Die Tiefe des Augenblicks verbirgt sich unter der Oberfläche der Geschäftigkeit.", author: "Eckhart Tolle" },
+  { text: "Wissen heißt wissen, dass man nichts weiß. Das ist die Bedeutung von wahrem Wissen.", author: "Sokrates" },
+  { text: "Die wichtigste Stunde ist immer die Gegenwart. Der bedeutendste Mensch ist immer der, der dir gegenübersteht.", author: "Meister Eckhart" },
+  { text: "Der Mensch leidet nicht am Geschehen, sondern an seiner Vorstellung davon.", author: "Epiktet" },
+  { text: "Das Leben wird nicht gemessen an der Zahl der Atemzüge, die wir nehmen, sondern an den Momenten, die uns den Atem rauben.", author: "Maya Angelou" },
+  { text: "Alles Wissen beginnt mit dem Staunen.", author: "Aristoteles" },
+  { text: "Die höchste Form des Wissens ist die Empathie, denn sie verlangt von uns, unser Ego aufzugeben.", author: "Bill Bullard" },
+  { text: "In dir ist ein Ort der Stille, in den du dich jederzeit zurückziehen kannst.", author: "Hermann Hesse" },
+  { text: "Freiheit bedeutet nicht die Abwesenheit von Verpflichtungen, sondern die Fähigkeit zu wählen.", author: "Paulo Coelho" },
+  { text: "Das Ganze ist mehr als die Summe seiner Teile.", author: "Aristoteles" },
+  { text: "Der intuitive Geist ist ein heiliges Geschenk und der rationale Geist ein treuer Diener.", author: "Albert Einstein" },
+  { text: "Klarheit entsteht aus dem Mut, sich der eigenen Verwirrung zu stellen.", author: "Pema Chödrön" },
+  { text: "Die eigentliche Entdeckungsreise besteht nicht darin, neue Landschaften zu suchen, sondern mit neuen Augen zu sehen.", author: "Marcel Proust" },
+  { text: "Sei du selbst die Veränderung, die du dir wünschst für diese Welt.", author: "Mahatma Gandhi" }
+];
+
+/* ============================================
+   Categories & Priority Definitions
+   ============================================ */
+const CATEGORIES = {
+  rossbacher: { label: "Rossbacher", emoji: "🏢", color: "var(--cat-rossbacher)" },
+  ki: { label: "KI & Lernen", emoji: "🤖", color: "var(--cat-ki)" },
+  kreativ: { label: "Kreativ", emoji: "📖", color: "var(--cat-kreativ)" },
+  familie: { label: "Familie", emoji: "👨‍👩‍👧", color: "var(--cat-familie)" },
+  persoenlich: { label: "Persönlich", emoji: "🧘", color: "var(--cat-persoenlich)" }
+};
+
+const PRIORITIES = {
+  high: { label: "Hoch", emoji: "🔴", value: 3 },
+  medium: { label: "Mittel", emoji: "🟡", value: 2 },
+  low: { label: "Niedrig", emoji: "🟢", value: 1 }
+};
+
+/* ============================================
+   Application State
+   ============================================ */
+let tasks = [];
+let editingTaskId = null;
+let focusMode = false;
+let draggedItem = null;
+
+/* ============================================
+   Initialization
+   ============================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasks();
+  loadTheme();
+  showDailyQuote();
+  setupEventListeners();
+  render();
+});
+
+function setupEventListeners() {
+  // Quick add
+  document.getElementById("quickAddInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const val = e.target.value.trim();
+      if (val) {
+        // Check if user typed category prefix like "rossbacher: ..." or "ki: ..."
+        quickAddTask(val);
+        e.target.value = "";
+      }
+    }
+  });
+
+  document.getElementById("quickAddBtn").addEventListener("click", () => {
+    const input = document.getElementById("quickAddInput");
+    const val = input.value.trim();
+    if (val) {
+      quickAddTask(val);
+      input.value = "";
+    } else {
+      openForm();
+    }
+  });
+
+  // Filters & sort
+  document.getElementById("filterCategory").addEventListener("change", render);
+  document.getElementById("filterPriority").addEventListener("change", render);
+  document.getElementById("sortBy").addEventListener("change", render);
+
+  // Focus mode
+  document.getElementById("focusBtn").addEventListener("click", toggleFocusMode);
+
+  // Theme toggle
+  document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+  // Close form on overlay click
+  document.getElementById("taskFormOverlay").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeForm();
+  });
+
+  // Close form on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeForm();
+  });
+
+  // Form submit on Enter in title
+  document.getElementById("formTitleInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitForm();
+  });
+}
+
+/* ============================================
+   Data Persistence
+   ============================================ */
+function loadTasks() {
+  try {
+    const data = localStorage.getItem("luisa_todo_tasks");
+    tasks = data ? JSON.parse(data) : [];
+  } catch {
+    tasks = [];
+  }
+}
+
+function saveTasks() {
+  localStorage.setItem("luisa_todo_tasks", JSON.stringify(tasks));
+}
+
+function loadTheme() {
+  const theme = localStorage.getItem("luisa_todo_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", theme);
+  document.getElementById("themeToggle").textContent = theme === "dark" ? "☀️" : "🌙";
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("luisa_todo_theme", next);
+  document.getElementById("themeToggle").textContent = next === "dark" ? "☀️" : "🌙";
+}
+
+/* ============================================
+   Daily Quote
+   ============================================ */
+function showDailyQuote() {
+  // Use day of year as seed for deterministic daily quote
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  const quote = QUOTES[dayOfYear % QUOTES.length];
+  document.getElementById("quoteText").textContent = `„${quote.text}"`;
+  document.getElementById("quoteAuthor").textContent = `— ${quote.author}`;
+}
+
+/* ============================================
+   Task CRUD Operations
+   ============================================ */
+function quickAddTask(text) {
+  // Parse category prefix (e.g., "ki: Learn Python")
+  let category = "persoenlich";
+  let title = text;
+
+  for (const [key] of Object.entries(CATEGORIES)) {
+    const prefix = key + ":";
+    if (text.toLowerCase().startsWith(prefix)) {
+      category = key;
+      title = text.slice(prefix.length).trim();
+      break;
+    }
+  }
+
+  const task = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    title: title,
+    description: "",
+    category: category,
+    priority: "medium",
+    dueDate: "",
+    completed: false,
+    completedAt: null,
+    createdAt: new Date().toISOString(),
+    order: tasks.length
+  };
+
+  tasks.push(task);
+  saveTasks();
+  render();
+}
+
+function openForm(taskId) {
+  editingTaskId = taskId || null;
+  const overlay = document.getElementById("taskFormOverlay");
+  const titleEl = document.getElementById("formTitle");
+  const submitBtn = document.getElementById("formSubmitBtn");
+
+  if (editingTaskId) {
+    const task = tasks.find(t => t.id === editingTaskId);
+    if (!task) return;
+    titleEl.textContent = "Aufgabe bearbeiten";
+    submitBtn.textContent = "Speichern";
+    document.getElementById("formTitleInput").value = task.title;
+    document.getElementById("formDesc").value = task.description || "";
+    document.getElementById("formCategory").value = task.category;
+    document.getElementById("formPriority").value = task.priority;
+    document.getElementById("formDueDate").value = task.dueDate || "";
+  } else {
+    titleEl.textContent = "Neue Aufgabe";
+    submitBtn.textContent = "Erstellen";
+    document.getElementById("formTitleInput").value = "";
+    document.getElementById("formDesc").value = "";
+    document.getElementById("formCategory").value = "rossbacher";
+    document.getElementById("formPriority").value = "medium";
+    document.getElementById("formDueDate").value = "";
+  }
+
+  overlay.classList.add("visible");
+  setTimeout(() => document.getElementById("formTitleInput").focus(), 100);
+}
+
+function closeForm() {
+  document.getElementById("taskFormOverlay").classList.remove("visible");
+  editingTaskId = null;
+}
+
+function submitForm() {
+  const title = document.getElementById("formTitleInput").value.trim();
+  if (!title) return;
+
+  const category = document.getElementById("formCategory").value;
+  const priority = document.getElementById("formPriority").value;
+  const description = document.getElementById("formDesc").value.trim();
+  const dueDate = document.getElementById("formDueDate").value;
+
+  if (editingTaskId) {
+    const task = tasks.find(t => t.id === editingTaskId);
+    if (task) {
+      task.title = title;
+      task.description = description;
+      task.category = category;
+      task.priority = priority;
+      task.dueDate = dueDate;
+    }
+  } else {
+    tasks.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      title: title,
+      description: description,
+      category: category,
+      priority: priority,
+      dueDate: dueDate,
+      completed: false,
+      completedAt: null,
+      createdAt: new Date().toISOString(),
+      order: tasks.length
+    });
+  }
+
+  saveTasks();
+  closeForm();
+  render();
+}
+
+function toggleComplete(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  task.completed = !task.completed;
+  task.completedAt = task.completed ? new Date().toISOString() : null;
+
+  if (task.completed) {
+    // Trigger completing animation
+    const el = document.querySelector(`[data-id="${id}"]`);
+    if (el) {
+      el.classList.add("completing");
+      // Sparkle effect
+      createSparkles(el);
+    }
+  }
+
+  saveTasks();
+
+  // Delay render slightly for animation
+  setTimeout(() => {
+    render();
+    checkAllDone();
+  }, task.completed ? 400 : 0);
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  render();
+}
+
+/* ============================================
+   Focus Mode
+   ============================================ */
+function toggleFocusMode() {
+  focusMode = !focusMode;
+  document.getElementById("focusBtn").classList.toggle("active", focusMode);
+  render();
+}
+
+function getFocusTasks(taskArray) {
+  // Get top 3 incomplete tasks: highest priority first, then nearest due date
+  const incomplete = taskArray.filter(t => !t.completed);
+  incomplete.sort((a, b) => {
+    const pa = PRIORITIES[a.priority]?.value || 0;
+    const pb = PRIORITIES[b.priority]?.value || 0;
+    if (pb !== pa) return pb - pa;
+    // Then by due date (soonest first, no date last)
+    if (a.dueDate && !b.dueDate) return -1;
+    if (!a.dueDate && b.dueDate) return 1;
+    if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    return 0;
+  });
+  return incomplete.slice(0, 3);
+}
+
+/* ============================================
+   Rendering
+   ============================================ */
+function render() {
+  renderStats();
+  renderOverdueReminder();
+  renderTaskList();
+}
+
+function renderStats() {
+  // Streak
+  const streak = calculateStreak();
+  document.getElementById("streakCount").textContent = streak;
+  document.getElementById("streakFire").style.display = streak > 0 ? "inline" : "none";
+
+  // Today's progress
+  const today = todayStr();
+  const todayTasks = tasks.filter(t => t.dueDate === today || (!t.dueDate && isCreatedToday(t)));
+  const todayDone = todayTasks.filter(t => t.completed).length;
+  const todayTotal = todayTasks.length;
+
+  // Also count tasks completed today regardless of due date
+  const completedToday = tasks.filter(t => t.completed && t.completedAt && t.completedAt.startsWith(today)).length;
+  const totalIncompleteOrDoneToday = tasks.filter(t => !t.completed).length + completedToday;
+
+  document.getElementById("todayProgress").textContent = `${completedToday}/${completedToday + tasks.filter(t => !t.completed).length}`;
+  const pct = totalIncompleteOrDoneToday > 0 ? (completedToday / (completedToday + tasks.filter(t => !t.completed).length)) * 100 : 0;
+  document.getElementById("progressFill").style.width = Math.min(pct, 100) + "%";
+
+  // Week overview
+  renderWeekOverview();
+}
+
+function renderWeekOverview() {
+  const dotsEl = document.getElementById("weekDots");
+  const labelsEl = document.getElementById("weekLabels");
+  const days = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+  let dotsHTML = "";
+  let labelsHTML = "";
+  let weekCompleted = 0;
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = formatDate(d);
+    const dayLabel = days[d.getDay()];
+    const count = tasks.filter(t => t.completed && t.completedAt && t.completedAt.startsWith(dateStr)).length;
+    weekCompleted += count;
+    dotsHTML += `<div class="week-dot ${count > 0 ? 'active' : ''}" title="${dayLabel}: ${count} erledigt"></div>`;
+    labelsHTML += `<span>${dayLabel}</span>`;
+  }
+
+  dotsEl.innerHTML = dotsHTML;
+  labelsEl.innerHTML = labelsHTML;
+  document.getElementById("weekSummary").textContent = `${weekCompleted} Aufgabe${weekCompleted !== 1 ? 'n' : ''} erledigt`;
+}
+
+function renderOverdueReminder() {
+  const today = todayStr();
+  const overdue = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < today);
+  const el = document.getElementById("overdueReminder");
+
+  if (overdue.length > 0) {
+    el.classList.add("visible");
+    const count = overdue.length;
+    document.getElementById("overdueText").textContent =
+      count === 1
+        ? "Eine Aufgabe wartet schon etwas länger auf dich — kein Stress, du schaffst das."
+        : `${count} Aufgaben warten schon etwas länger auf dich — kein Stress, eins nach dem anderen.`;
+  } else {
+    el.classList.remove("visible");
+  }
+}
+
+function renderTaskList() {
+  const listEl = document.getElementById("taskList");
+  const catFilter = document.getElementById("filterCategory").value;
+  const prioFilter = document.getElementById("filterPriority").value;
+  const sortBy = document.getElementById("sortBy").value;
+
+  let filtered = tasks.filter(t => {
+    if (catFilter !== "all" && t.category !== catFilter) return false;
+    if (prioFilter !== "all" && t.priority !== prioFilter) return false;
+    return true;
+  });
+
+  // Sort
+  if (sortBy === "dueDate") {
+    filtered.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (a.dueDate && !b.dueDate) return -1;
+      if (!a.dueDate && b.dueDate) return 1;
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      return 0;
+    });
+  } else if (sortBy === "priority") {
+    filtered.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (PRIORITIES[b.priority]?.value || 0) - (PRIORITIES[a.priority]?.value || 0);
+    });
+  } else if (sortBy === "created") {
+    filtered.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (b.createdAt || "").localeCompare(a.createdAt || "");
+    });
+  } else {
+    // Manual order: incomplete first, then completed
+    filtered.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (a.order || 0) - (b.order || 0);
+    });
+  }
+
+  // Focus mode: only show top 3
+  if (focusMode) {
+    const focused = getFocusTasks(filtered);
+    filtered = focused;
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">${focusMode ? '🎯' : '✨'}</div>
+        <div class="empty-state-text">${focusMode ? 'Keine dringenden Aufgaben — genieß den Moment!' : 'Keine Aufgaben — Zeit für etwas Neues!'}</div>
+      </div>`;
+    return;
+  }
+
+  const today = todayStr();
+
+  listEl.innerHTML = filtered.map(task => {
+    const cat = CATEGORIES[task.category] || CATEGORIES.persoenlich;
+    const prio = PRIORITIES[task.priority] || PRIORITIES.medium;
+    const isOverdue = !task.completed && task.dueDate && task.dueDate < today;
+    const isDueToday = task.dueDate === today;
+    let dueBadge = "";
+
+    if (task.dueDate) {
+      const dueLabel = isDueToday ? "Heute" : isOverdue ? "Überfällig" : formatDateDisplay(task.dueDate);
+      dueBadge = `<span class="task-badge badge-due ${isOverdue ? 'badge-overdue' : ''}">${dueLabel}</span>`;
+    }
+
+    return `
+      <div class="task-item ${task.completed ? 'completed' : ''}"
+           data-id="${task.id}"
+           data-category="${task.category}"
+           draggable="true"
+           ondragstart="onDragStart(event)"
+           ondragover="onDragOver(event)"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event)"
+           ondragend="onDragEnd(event)">
+        <div class="task-check" onclick="toggleComplete('${task.id}')">
+          ${task.completed ? '✓' : ''}
+        </div>
+        <div class="task-content">
+          <div class="task-title">${escapeHTML(task.title)}</div>
+          ${task.description ? `<div class="task-desc">${escapeHTML(task.description)}</div>` : ''}
+          <div class="task-meta">
+            <span class="task-badge badge-category" style="color:${cat.color}">${cat.emoji} ${cat.label}</span>
+            <span class="task-badge badge-prio-${task.priority}">${prio.emoji} ${prio.label}</span>
+            ${dueBadge}
+          </div>
+        </div>
+        <div class="task-actions">
+          <button onclick="openForm('${task.id}')" title="Bearbeiten">✏️</button>
+          <button class="btn-delete" onclick="deleteTask('${task.id}')" title="Löschen">🗑️</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+/* ============================================
+   Streak Calculation
+   ============================================ */
+function calculateStreak() {
+  let streak = 0;
+  const d = new Date();
+
+  // Check if something was completed today
+  const todayDate = formatDate(d);
+  const todayCompleted = tasks.some(t => t.completed && t.completedAt && t.completedAt.startsWith(todayDate));
+
+  if (!todayCompleted) {
+    // Check yesterday to see if streak is still alive
+    d.setDate(d.getDate() - 1);
+    const yesterdayDate = formatDate(d);
+    const yesterdayCompleted = tasks.some(t => t.completed && t.completedAt && t.completedAt.startsWith(yesterdayDate));
+    if (!yesterdayCompleted) return 0;
+    // Streak doesn't include today yet, start counting from yesterday
+  } else {
+    streak = 1;
+    d.setDate(d.getDate() - 1);
+  }
+
+  // Count backwards
+  for (let i = 0; i < 365; i++) {
+    const dateStr = formatDate(d);
+    const completed = tasks.some(t => t.completed && t.completedAt && t.completedAt.startsWith(dateStr));
+    if (completed) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+/* ============================================
+   Celebration when all done
+   ============================================ */
+function checkAllDone() {
+  const incomplete = tasks.filter(t => !t.completed);
+  const completedToday = tasks.filter(t => t.completed && t.completedAt && t.completedAt.startsWith(todayStr())).length;
+
+  if (incomplete.length === 0 && tasks.length > 0 && completedToday > 0) {
+    celebrate();
+  }
+}
+
+function celebrate() {
+  const overlay = document.getElementById("celebrationOverlay");
+  overlay.classList.add("active");
+
+  // Launch confetti
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => createConfetti(), i * 50);
+  }
+
+  setTimeout(() => overlay.classList.remove("active"), 3000);
+}
+
+function createConfetti() {
+  const el = document.createElement("div");
+  el.className = "confetti";
+  el.style.left = Math.random() * 100 + "vw";
+  el.style.background = ['#d4a843', '#e74c3c', '#27ae60', '#5dade2', '#a78bfa', '#f0a500', '#e879a8'][Math.floor(Math.random() * 7)];
+  el.style.animationDuration = (2 + Math.random() * 2) + "s";
+  el.style.animationDelay = Math.random() * 0.5 + "s";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function createSparkles(el) {
+  const rect = el.getBoundingClientRect();
+  for (let i = 0; i < 6; i++) {
+    const spark = document.createElement("div");
+    spark.textContent = "✨";
+    spark.style.cssText = `
+      position: fixed;
+      left: ${rect.left + Math.random() * rect.width}px;
+      top: ${rect.top + Math.random() * rect.height}px;
+      font-size: ${10 + Math.random() * 10}px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: sparkleAnim 0.8s ease forwards;
+    `;
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 1000);
+  }
+}
+
+// Add sparkle animation dynamically
+const sparkStyle = document.createElement("style");
+sparkStyle.textContent = `
+  @keyframes sparkleAnim {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(${Math.random() > 0.5 ? '' : '-'}20px, -30px) scale(0.3); }
+  }
+`;
+document.head.appendChild(sparkStyle);
+
+/* ============================================
+   Drag & Drop
+   ============================================ */
+function onDragStart(e) {
+  draggedItem = e.currentTarget;
+  draggedItem.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", draggedItem.dataset.id);
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+  const target = e.currentTarget;
+  if (target !== draggedItem) {
+    target.classList.add("drag-over");
+  }
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove("drag-over");
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  const fromId = e.dataTransfer.getData("text/plain");
+  const toId = e.currentTarget.dataset.id;
+
+  if (fromId === toId) return;
+
+  const fromIdx = tasks.findIndex(t => t.id === fromId);
+  const toIdx = tasks.findIndex(t => t.id === toId);
+
+  if (fromIdx === -1 || toIdx === -1) return;
+
+  // Move task
+  const [moved] = tasks.splice(fromIdx, 1);
+  tasks.splice(toIdx, 0, moved);
+
+  // Update order
+  tasks.forEach((t, i) => t.order = i);
+  saveTasks();
+
+  // Set sort to manual
+  document.getElementById("sortBy").value = "manual";
+  render();
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove("dragging");
+  document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
+  draggedItem = null;
+}
+
+/* ============================================
+   Import / Export
+   ============================================ */
+function exportTasks() {
+  const data = JSON.stringify(tasks, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `luisa-todos-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importTasks(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (Array.isArray(imported)) {
+        tasks = imported;
+        saveTasks();
+        render();
+      }
+    } catch {
+      alert("Die Datei konnte nicht gelesen werden. Bitte eine gültige JSON-Datei verwenden.");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+/* ============================================
+   Utility Functions
+   ============================================ */
+function todayStr() {
+  return formatDate(new Date());
+}
+
+function formatDate(d) {
+  return d.getFullYear() + "-" +
+    String(d.getMonth() + 1).padStart(2, "0") + "-" +
+    String(d.getDate()).padStart(2, "0");
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+function isCreatedToday(task) {
+  return task.createdAt && task.createdAt.startsWith(todayStr());
+}
+
+function escapeHTML(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
