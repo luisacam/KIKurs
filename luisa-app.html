@@ -818,6 +818,201 @@ textarea { min-height: 80px; resize: vertical; }
   font-size: 0.88rem;
   cursor: pointer;
 }
+
+/* ========== Mood Check Overlay ========== */
+.mood-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  animation: fadeIn 0.5s ease;
+}
+.mood-overlay.open { display: flex; }
+.mood-greeting {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--text);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.mood-sub {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.mood-options {
+  display: flex;
+  gap: 12px;
+}
+.mood-btn {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.mood-btn:hover { transform: scale(1.15); border-color: var(--accent); }
+.mood-btn:active { transform: scale(0.95); }
+.mood-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 4px;
+}
+.mood-skip {
+  margin-top: 24px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+.mood-skip:hover { color: var(--text-muted); }
+
+/* ========== Mood-adaptive banner ========== */
+.mood-banner {
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  text-align: center;
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+.mood-banner.visible { display: block; }
+.mood-banner.mood-1 { background: rgba(156,109,215,0.12); border: 1px solid rgba(156,109,215,0.2); }
+.mood-banner.mood-2 { background: rgba(74,144,217,0.1); border: 1px solid rgba(74,144,217,0.2); }
+.mood-banner.mood-3 { background: var(--accent-glow); border: 1px solid rgba(201,168,76,0.2); }
+.mood-banner.mood-4 { background: rgba(102,187,106,0.1); border: 1px solid rgba(102,187,106,0.2); }
+.mood-banner.mood-5 { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); }
+
+/* ========== Energy Tag ========== */
+.energy-tag-popup {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 400;
+  align-items: center; justify-content: center;
+}
+.energy-tag-popup.open { display: flex; }
+.energy-tag-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+.energy-tag-card h3 { color: var(--accent); margin-bottom: 4px; }
+.energy-tag-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+.energy-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+.energy-btn {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.energy-btn:hover { transform: scale(1.12); border-color: var(--accent); }
+.energy-skip {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* ========== "Genug für heute" ========== */
+.enough-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 450;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 32px;
+  animation: fadeIn 0.6s ease;
+}
+.enough-overlay.open { display: flex; }
+.enough-emoji { font-size: 4rem; margin-bottom: 16px; }
+.enough-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.enough-message {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 400px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.enough-stats {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+.enough-stats strong { color: var(--accent); }
+
+/* ========== Briefe an mich ========== */
+.letter-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 400;
+  align-items: center; justify-content: center;
+}
+.letter-overlay.open { display: flex; }
+.letter-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 460px;
+  width: 92%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.letter-card h3 { color: var(--accent); margin-bottom: 14px; }
+.letter-item {
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--accent);
+}
+.letter-text {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.letter-date { font-size: 0.78rem; color: var(--text-dim); }
+.letter-mood { font-size: 0.85rem; }
 </style>
 </head>
 <body>
@@ -847,6 +1042,9 @@ textarea { min-height: 80px; resize: vertical; }
 
   <!-- ==================== TAB 1: AUFGABEN ==================== -->
   <div class="tab-content active" id="tab-tasks">
+
+    <!-- Mood Banner (appears after mood check) -->
+    <div class="mood-banner" id="moodBanner"></div>
 
     <!-- Tagesspruch -->
     <div class="card quote-card" id="quoteCard">
@@ -897,6 +1095,8 @@ textarea { min-height: 80px; resize: vertical; }
       </select>
       <button class="filter-btn" id="focusBtn" onclick="toggleFocus()">🎯 Top 3</button>
       <button class="filter-btn" id="quickTaskBtn" onclick="toggleQuickFilter()">⚡ 2 Min</button>
+      <button class="filter-btn" onclick="openEnough()">🌿 Genug</button>
+      <button class="filter-btn" onclick="openLetters()">💌 Briefe</button>
       <select id="sortBy" onchange="renderTasks()" autocomplete="off">
         <option value="manual">Manuell</option>
         <option value="date">Nach Datum</option>
@@ -1049,6 +1249,51 @@ textarea { min-height: 80px; resize: vertical; }
       <button class="btn btn-secondary" onclick="closeTaskForm()">Abbrechen</button>
       <button class="btn btn-primary" onclick="saveTask()">Speichern</button>
     </div>
+  </div>
+</div>
+
+<!-- Mood Check Overlay -->
+<div class="mood-overlay" id="moodOverlay">
+  <div class="mood-greeting" id="moodGreeting">Guten Morgen, Luisa</div>
+  <div class="mood-sub">Wie geht es dir gerade?</div>
+  <div class="mood-options">
+    <div style="text-align:center"><button class="mood-btn" onclick="setMood(1)">😔</button><div class="mood-label">Schwer</div></div>
+    <div style="text-align:center"><button class="mood-btn" onclick="setMood(2)">😕</button><div class="mood-label">Meh</div></div>
+    <div style="text-align:center"><button class="mood-btn" onclick="setMood(3)">😐</button><div class="mood-label">Okay</div></div>
+    <div style="text-align:center"><button class="mood-btn" onclick="setMood(4)">🙂</button><div class="mood-label">Gut</div></div>
+    <div style="text-align:center"><button class="mood-btn" onclick="setMood(5)">😊</button><div class="mood-label">Super</div></div>
+  </div>
+  <button class="mood-skip" onclick="skipMood()">Überspringen</button>
+</div>
+
+<!-- Energy Tag Popup -->
+<div class="energy-tag-popup" id="energyPopup">
+  <div class="energy-tag-card">
+    <h3>Geschafft! ✨</h3>
+    <p id="energyTaskName">Wie hat sich das angefühlt?</p>
+    <div class="energy-btns">
+      <div style="text-align:center"><button class="energy-btn" onclick="tagEnergy('drain')">🔋</button><div class="mood-label">Erschöpft</div></div>
+      <div style="text-align:center"><button class="energy-btn" onclick="tagEnergy('neutral')">😐</button><div class="mood-label">Neutral</div></div>
+      <div style="text-align:center"><button class="energy-btn" onclick="tagEnergy('boost')">⚡</button><div class="mood-label">Energie!</div></div>
+    </div>
+    <button class="energy-skip" onclick="tagEnergy('skip')">Überspringen</button>
+  </div>
+</div>
+
+<!-- "Genug für heute" Overlay -->
+<div class="enough-overlay" id="enoughOverlay">
+  <div class="enough-emoji">🌿</div>
+  <div class="enough-title">Genug für heute.</div>
+  <div class="enough-message" id="enoughMessage">Du hast getan was du konntest. Das ist immer genug.</div>
+  <div class="enough-stats" id="enoughStats"></div>
+  <button class="btn btn-primary" onclick="closeEnough()" style="min-width:180px;">Danke 💛</button>
+</div>
+
+<!-- Briefe an mich -->
+<div class="letter-overlay" id="letterOverlay" onclick="closeLetterOutside(event)">
+  <div class="letter-card" id="letterCard">
+    <h3>💌 Briefe an mich</h3>
+    <div id="letterContent"></div>
   </div>
 </div>
 
@@ -2569,6 +2814,370 @@ function clearChat() {
   pendingActions = [];
   showChatView();
 }
+
+// ========== Innerer Kompass: Mood Check ==========
+const MOOD_MESSAGES = {
+  1: {
+    banner: '🫂 Heute ist ein schwerer Tag. Du musst nicht alles schaffen. Nur das, was sich richtig anfühlt.',
+    maxTasks: 1
+  },
+  2: {
+    banner: '💙 Nicht jeder Tag muss perfekt sein. Nimm dir nur das Wichtigste vor.',
+    maxTasks: 3
+  },
+  3: {
+    banner: '✨ Solider Tag. Schritt für Schritt.',
+    maxTasks: null
+  },
+  4: {
+    banner: '🌟 Schöne Energie heute! Nutze den Flow.',
+    maxTasks: null
+  },
+  5: {
+    banner: '🔥 Du strahlst heute! Perfekter Tag für große Dinge.',
+    maxTasks: null
+  }
+};
+
+function checkMoodOnOpen() {
+  const today = todayStr();
+  const lastMoodDate = state.moodLog ? Object.keys(state.moodLog).sort().pop() : null;
+
+  // Show mood check once per day
+  if (lastMoodDate !== today) {
+    const hour = new Date().getHours();
+    let greeting = 'Guten Morgen';
+    if (hour >= 12 && hour < 17) greeting = 'Hallo';
+    if (hour >= 17) greeting = 'Guten Abend';
+    document.getElementById('moodGreeting').textContent = greeting + ', Luisa';
+    document.getElementById('moodOverlay').classList.add('open');
+  } else {
+    // Already checked today, show banner
+    const todayMood = state.moodLog[today];
+    if (todayMood) showMoodBanner(todayMood);
+  }
+}
+
+function setMood(level) {
+  const today = todayStr();
+  if (!state.moodLog) state.moodLog = {};
+  state.moodLog[today] = level;
+  state.currentMood = level;
+  saveState();
+
+  document.getElementById('moodOverlay').classList.remove('open');
+  showMoodBanner(level);
+
+  // Offer to write a letter on good days
+  if (level >= 4) {
+    setTimeout(() => {
+      offerLetterPrompt();
+    }, 2000);
+  }
+
+  // On bad days, show a letter from the past
+  if (level <= 2 && state.letters && state.letters.length > 0) {
+    setTimeout(() => {
+      showLetterFromPast();
+    }, 1500);
+  }
+
+  renderTasks();
+}
+
+function skipMood() {
+  document.getElementById('moodOverlay').classList.remove('open');
+  state.currentMood = 3;
+}
+
+function showMoodBanner(level) {
+  const banner = document.getElementById('moodBanner');
+  const msg = MOOD_MESSAGES[level];
+  banner.className = `mood-banner mood-${level} visible`;
+  banner.textContent = msg.banner;
+}
+
+function getMoodTaskLimit() {
+  if (!state.currentMood) return null;
+  return MOOD_MESSAGES[state.currentMood]?.maxTasks || null;
+}
+
+// ========== Innerer Kompass: Energy Tracking ==========
+let energyTaskId = null;
+
+function showEnergyPopup(taskId, taskTitle) {
+  energyTaskId = taskId;
+  document.getElementById('energyTaskName').textContent = `"${taskTitle}" — wie hat sich das angefühlt?`;
+  document.getElementById('energyPopup').classList.add('open');
+}
+
+function tagEnergy(level) {
+  if (energyTaskId && level !== 'skip') {
+    const t = state.tasks.find(t => t.id === energyTaskId);
+    if (t) t.energyTag = level;
+
+    if (!state.energyLog) state.energyLog = [];
+    state.energyLog.push({
+      taskId: energyTaskId,
+      cat: t?.cat,
+      energy: level,
+      date: todayStr(),
+      ts: Date.now()
+    });
+    saveState();
+  }
+  energyTaskId = null;
+  document.getElementById('energyPopup').classList.remove('open');
+}
+
+function getEnergyInsight() {
+  if (!state.energyLog || state.energyLog.length < 5) return null;
+
+  const catEnergy = {};
+  state.energyLog.forEach(e => {
+    if (!catEnergy[e.cat]) catEnergy[e.cat] = { boost: 0, drain: 0, total: 0 };
+    catEnergy[e.cat].total++;
+    if (e.energy === 'boost') catEnergy[e.cat].boost++;
+    if (e.energy === 'drain') catEnergy[e.cat].drain++;
+  });
+
+  let bestCat = null, worstCat = null, bestRatio = -1, worstRatio = 2;
+  Object.entries(catEnergy).forEach(([cat, data]) => {
+    if (data.total < 2) return;
+    const ratio = data.boost / data.total;
+    if (ratio > bestRatio) { bestRatio = ratio; bestCat = cat; }
+    if (ratio < worstRatio) { worstRatio = ratio; worstCat = cat; }
+  });
+
+  if (bestCat && worstCat && bestCat !== worstCat) {
+    return `${CATEGORIES[bestCat]?.label || bestCat} gibt dir Energie. ${CATEGORIES[worstCat]?.label || worstCat} kostet dich eher Kraft. Wechsle ab! 💡`;
+  }
+  return null;
+}
+
+// ========== "Genug für heute" ==========
+function openEnough() {
+  const today = todayStr();
+  const todayDone = state.tasks.filter(t => t.done && t.doneDate && dateStr(new Date(t.doneDate)) === today).length;
+  const totalDone = state.tasks.filter(t => t.done).length;
+
+  document.getElementById('enoughStats').innerHTML =
+    `Heute erledigt: <strong>${todayDone}</strong> Aufgaben<br>` +
+    `Streak: <strong>${state.streak.current}</strong> Tage<br>` +
+    `Insgesamt geschafft: <strong>${totalDone}</strong> Aufgaben`;
+
+  const messages = [
+    'Du hast getan was du konntest.\nDas ist immer genug.',
+    'Nicht alles muss heute passieren.\nMorgen ist auch ein Tag.',
+    'Erlaube dir, jetzt loszulassen.\nDu hast es dir verdient.',
+    'Produktivität bedeutet auch\nzu wissen, wann man aufhört.',
+    'Du bist mehr als deine To-Do-Liste.\nViel mehr.',
+    'Das Wichtigste heute: Du warst da.\nFür dich und für andere.'
+  ];
+  document.getElementById('enoughMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
+  document.getElementById('enoughOverlay').classList.add('open');
+  spawnConfetti(25);
+}
+
+function closeEnough() {
+  document.getElementById('enoughOverlay').classList.remove('open');
+}
+
+// ========== Briefe an mich ==========
+function openLetters() {
+  const overlay = document.getElementById('letterOverlay');
+  overlay.classList.add('open');
+  renderLetters();
+}
+
+function closeLetterOutside(e) {
+  if (e.target === document.getElementById('letterOverlay')) {
+    document.getElementById('letterOverlay').classList.remove('open');
+  }
+}
+
+function renderLetters() {
+  const container = document.getElementById('letterContent');
+  if (!state.letters) state.letters = [];
+
+  let html = `<div style="margin-bottom:14px;">
+    <textarea id="newLetterText" placeholder="Schreib deinem zukünftigen Ich eine Nachricht... Was möchtest du dir an einem schweren Tag sagen?" autocomplete="off" spellcheck="false" style="min-height:100px;width:100%;"></textarea>
+    <button class="btn btn-primary" onclick="saveLetter()" style="margin-top:8px;width:100%;">💌 Brief speichern</button>
+  </div>`;
+
+  if (state.letters.length === 0) {
+    html += `<div style="text-align:center;color:var(--text-dim);padding:16px;">
+      <p>Noch keine Briefe. Schreib dir etwas Schönes für schwere Tage.</p>
+    </div>`;
+  } else {
+    // Show newest first
+    [...state.letters].reverse().forEach((letter, i) => {
+      const idx = state.letters.length - 1 - i;
+      html += `<div class="letter-item">
+        <div class="letter-text">${esc(letter.text)}</div>
+        <div class="letter-date">${formatDate(letter.date)} ${letter.mood ? '<span class="letter-mood">' + moodEmoji(letter.mood) + '</span>' : ''}</div>
+        <button class="subtask-del" onclick="deleteLetter(${idx})" style="float:right;margin-top:-20px;">✕</button>
+      </div>`;
+    });
+  }
+  container.innerHTML = html;
+}
+
+function saveLetter() {
+  const text = document.getElementById('newLetterText').value.trim();
+  if (!text) return;
+  if (!state.letters) state.letters = [];
+  state.letters.push({
+    text: text,
+    date: todayStr(),
+    mood: state.currentMood || null,
+    ts: Date.now()
+  });
+  saveState();
+  document.getElementById('newLetterText').value = '';
+  renderLetters();
+}
+
+function deleteLetter(idx) {
+  if (!state.letters) return;
+  state.letters.splice(idx, 1);
+  saveState();
+  renderLetters();
+}
+
+function moodEmoji(level) {
+  return ['','😔','😕','😐','🙂','😊'][level] || '';
+}
+
+function offerLetterPrompt() {
+  // Gentle suggestion on good days — via the mood banner
+  const banner = document.getElementById('moodBanner');
+  const current = banner.textContent;
+  banner.innerHTML = current + '<br><button class="filter-btn" onclick="openLetters()" style="margin-top:8px;font-size:0.85rem;">💌 Brief an mein zukünftiges Ich schreiben</button>';
+}
+
+function showLetterFromPast() {
+  if (!state.letters || state.letters.length === 0) return;
+  // Pick a random letter from a good day
+  const goodLetters = state.letters.filter(l => l.mood && l.mood >= 4);
+  const pool = goodLetters.length > 0 ? goodLetters : state.letters;
+  const letter = pool[Math.floor(Math.random() * pool.length)];
+
+  const banner = document.getElementById('moodBanner');
+  banner.innerHTML += `<div style="margin-top:10px;padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border-left:3px solid var(--accent);text-align:left;">
+    <div style="font-size:0.8rem;color:var(--accent);margin-bottom:4px;">💌 Du an dich, am ${formatDate(letter.date)}:</div>
+    <div style="font-family:var(--font-heading);font-style:italic;font-size:1rem;line-height:1.5;">${esc(letter.text)}</div>
+  </div>`;
+}
+
+// ========== Override toggleTaskDone for energy tracking ==========
+const _origToggleTaskDone = toggleTaskDone;
+toggleTaskDone = function(id) {
+  const t = state.tasks.find(t => t.id === id);
+  const wasDone = t?.done;
+  _origToggleTaskDone(id);
+  // If task was just completed, show energy popup
+  if (t && !wasDone && t.done) {
+    setTimeout(() => showEnergyPopup(id, t.title), 600);
+  }
+};
+
+// ========== Override renderTasks for mood-adaptive display ==========
+const _origRenderTasks = renderTasks;
+renderTasks = function() {
+  _origRenderTasks();
+
+  // In mood-limited mode, hide extra tasks
+  const limit = getMoodTaskLimit();
+  if (limit && !state.focusMode) {
+    const items = document.querySelectorAll('.task-item:not(.done)');
+    let shown = 0;
+    items.forEach(item => {
+      if (shown >= limit) {
+        item.style.display = 'none';
+      }
+      shown++;
+    });
+    if (items.length > limit) {
+      const hint = document.getElementById('twoMinHint');
+      if (!state.quickFilter) {
+        // Show gentle hint
+        const existing = document.getElementById('moodLimitHint');
+        if (!existing) {
+          const hintEl = document.createElement('div');
+          hintEl.id = 'moodLimitHint';
+          hintEl.className = 'card';
+          hintEl.style.cssText = 'background:var(--accent-glow);border-color:rgba(201,168,76,0.2);text-align:center;font-size:0.9rem;color:var(--text-muted);';
+          hintEl.textContent = `Heute zeige ich dir nur ${limit} Aufgabe${limit > 1 ? 'n' : ''} – das reicht. 💛`;
+          document.getElementById('taskList').before(hintEl);
+        }
+      }
+    }
+  } else {
+    const existing = document.getElementById('moodLimitHint');
+    if (existing) existing.remove();
+  }
+};
+
+// ========== Add energy insight to stats ==========
+const _origRenderStatsTab = renderStatsTab;
+renderStatsTab = function() {
+  _origRenderStatsTab();
+  const insight = getEnergyInsight();
+  if (insight) {
+    document.getElementById('statMessage').textContent += '\n' + insight;
+  }
+
+  // Add mood chart
+  if (state.moodLog) {
+    const now = new Date();
+    const dayOfWeek = (now.getDay() + 6) % 7;
+    const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    let moodHtml = '<div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - dayOfWeek + i);
+      const ds = dateStr(d);
+      const mood = state.moodLog[ds];
+      moodHtml += `<div style="text-align:center;"><div style="font-size:1.3rem;">${mood ? moodEmoji(mood) : '·'}</div><div style="font-size:0.7rem;color:var(--text-dim);">${days[i]}</div></div>`;
+    }
+    moodHtml += '</div>';
+
+    const streakCard = document.querySelector('#statStreakMax').closest('.card');
+    if (streakCard) {
+      const moodCard = document.createElement('div');
+      moodCard.className = 'card';
+      moodCard.style.marginTop = '12px';
+      moodCard.innerHTML = `<h3 style="margin-bottom:8px;color:var(--accent);">Stimmungs-Verlauf</h3>${moodHtml}`;
+      streakCard.after(moodCard);
+    }
+  }
+};
+
+// ========== Add mood context to Claude ==========
+const _origGetTaskContext = getTaskContext;
+getTaskContext = function() {
+  let ctx = _origGetTaskContext();
+  if (state.currentMood) {
+    ctx += `\nLuisas Stimmung heute: ${state.currentMood}/5 (${moodEmoji(state.currentMood)})\n`;
+  }
+  const insight = getEnergyInsight();
+  if (insight) ctx += `Energie-Erkenntnis: ${insight}\n`;
+  if (state.letters && state.letters.length > 0) {
+    ctx += `Luisa hat ${state.letters.length} Briefe an sich selbst geschrieben.\n`;
+  }
+  return ctx;
+};
+
+// ========== Init mood on start ==========
+const _origInit = init;
+init = function() {
+  _origInit();
+  if (!state.moodLog) state.moodLog = {};
+  if (!state.energyLog) state.energyLog = [];
+  if (!state.letters) state.letters = [];
+  checkMoodOnOpen();
+};
 
 // ========== Start ==========
 init();
