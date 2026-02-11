@@ -1013,6 +1013,146 @@ textarea { min-height: 80px; resize: vertical; }
 }
 .letter-date { font-size: 0.78rem; color: var(--text-dim); }
 .letter-mood { font-size: 0.85rem; }
+
+/* ========== Category Pills ========== */
+.cat-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.cat-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.cat-pill:hover { border-color: var(--text-muted); }
+.cat-pill.selected {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+.cat-pill .cat-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cat-pill-add {
+  padding: 7px 10px;
+  border-radius: 20px;
+  border: 2px dashed var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: all 0.2s ease;
+}
+.cat-pill-add:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Auto-detect hint */
+.cat-auto-hint {
+  display: none;
+  padding: 5px 12px;
+  background: var(--accent-glow);
+  border-radius: 16px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  margin-top: 4px;
+  animation: fadeIn 0.3s ease;
+}
+.cat-auto-hint.visible { display: inline-block; }
+
+/* Category Manager */
+.cat-manager-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 400;
+  align-items: center; justify-content: center;
+}
+.cat-manager-overlay.open { display: flex; }
+.cat-manager {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 440px;
+  width: 92%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.cat-manager h3 { color: var(--accent); margin-bottom: 14px; }
+.cat-edit-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.cat-edit-item .cat-emoji-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.cat-edit-item input {
+  flex: 1;
+  min-width: 0;
+}
+.cat-color-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  cursor: pointer;
+}
+.cat-color-btn:hover { border-color: var(--text); }
+.cat-del-btn {
+  background: none; border: none;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.cat-del-btn:hover { color: #ef5350; }
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+.emoji-grid button {
+  width: 36px; height: 36px;
+  border: none; background: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.emoji-grid button:hover { background: var(--bg-hover); }
+.color-grid {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.color-swatch {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--text); }
 </style>
 </head>
 <body>
@@ -1072,20 +1212,16 @@ textarea { min-height: 80px; resize: vertical; }
 
     <!-- Quick Add -->
     <div class="quick-add">
-      <input type="text" id="quickAddInput" placeholder="Neue Aufgabe... (r: k: ki: f: p: Shortcuts)" autocomplete="off" spellcheck="false">
+      <input type="text" id="quickAddInput" placeholder="Neue Aufgabe eingeben..." autocomplete="off" spellcheck="false" oninput="onQuickAddInput()">
       <button class="btn btn-primary" onclick="quickAddTask()">+</button>
       <button class="btn btn-secondary" onclick="openTaskForm()">⋯</button>
     </div>
+    <div class="cat-auto-hint" id="catAutoHint"></div>
 
     <!-- Filters -->
     <div class="filters">
       <select id="filterCat" onchange="renderTasks()" autocomplete="off">
-        <option value="">Alle Kategorien</option>
-        <option value="rossbacher">🏢 Rossbacher</option>
-        <option value="ki">🤖 KI & Lernen</option>
-        <option value="kreativ">📖 Kreativ</option>
-        <option value="familie">👨‍👩‍👧 Familie</option>
-        <option value="persoenlich">🧘 Persönlich</option>
+        <option value="">Alle</option>
       </select>
       <select id="filterPrio" onchange="renderTasks()" autocomplete="off">
         <option value="">Alle Prioritäten</option>
@@ -1220,25 +1356,18 @@ textarea { min-height: 80px; resize: vertical; }
       <label>Beschreibung (optional)</label>
       <textarea id="tfDesc" placeholder="Details..." autocomplete="off" spellcheck="false"></textarea>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Kategorie</label>
-        <select id="tfCat" autocomplete="off">
-          <option value="rossbacher">🏢 Rossbacher</option>
-          <option value="ki">🤖 KI & Lernen</option>
-          <option value="kreativ">📖 Kreativ</option>
-          <option value="familie">👨‍👩‍👧 Familie</option>
-          <option value="persoenlich">🧘 Persönlich</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Priorität</label>
-        <select id="tfPrio" autocomplete="off">
-          <option value="medium">🟡 Mittel</option>
-          <option value="high">🔴 Hoch</option>
-          <option value="low">🟢 Niedrig</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label>Kategorie <button class="cat-pill-add" onclick="openCatManager()" style="font-size:0.75rem;padding:2px 8px;">⚙️ Verwalten</button></label>
+      <div class="cat-pills" id="tfCatPills"></div>
+      <input type="hidden" id="tfCat" value="rossbacher">
+    </div>
+    <div class="form-group">
+      <label>Priorität</label>
+      <select id="tfPrio" autocomplete="off">
+        <option value="medium">🟡 Mittel</option>
+        <option value="high">🔴 Hoch</option>
+        <option value="low">🟢 Niedrig</option>
+      </select>
     </div>
     <div class="form-group">
       <label>Fällig am</label>
@@ -1249,6 +1378,16 @@ textarea { min-height: 80px; resize: vertical; }
       <button class="btn btn-secondary" onclick="closeTaskForm()">Abbrechen</button>
       <button class="btn btn-primary" onclick="saveTask()">Speichern</button>
     </div>
+  </div>
+</div>
+
+<!-- Category Manager Overlay -->
+<div class="cat-manager-overlay" id="catManagerOverlay" onclick="if(event.target===this)closeCatManager()">
+  <div class="cat-manager" id="catManager">
+    <h3>Kategorien verwalten</h3>
+    <div id="catManagerList"></div>
+    <button class="btn btn-secondary" onclick="addNewCategory()" style="width:100%;margin-top:8px;">+ Neue Kategorie</button>
+    <button class="btn btn-primary" onclick="saveCatManager()" style="width:100%;margin-top:8px;">Speichern</button>
   </div>
 </div>
 
@@ -1383,14 +1522,333 @@ const QUOTES = [
 ];
 
 // ========== Category Config ==========
-const CATEGORIES = {
-  rossbacher: { label: '🏢 Rossbacher', color: 'var(--cat-rossbacher)' },
-  ki: { label: '🤖 KI & Lernen', color: 'var(--cat-ki)' },
-  kreativ: { label: '📖 Kreativ', color: 'var(--cat-kreativ)' },
-  familie: { label: '👨‍👩‍👧 Familie', color: 'var(--cat-familie)' },
-  persoenlich: { label: '🧘 Persönlich', color: 'var(--cat-persoenlich)' }
+// ========== Smart Category System ==========
+const DEFAULT_CATEGORIES = {
+  rossbacher: { label: '🏢 Rossbacher', color: '#4a90d9', emoji: '🏢' },
+  ki: { label: '🤖 KI & Lernen', color: '#9b6dd7', emoji: '🤖' },
+  kreativ: { label: '📖 Kreativ', color: '#c9a84c', emoji: '📖' },
+  familie: { label: '👨‍👩‍👧 Familie', color: '#d9739e', emoji: '👨‍👩‍👧' },
+  persoenlich: { label: '🧘 Persönlich', color: '#4ecdc4', emoji: '🧘' }
 };
+
+function getCategories() {
+  if (state.customCategories && Object.keys(state.customCategories).length > 0) {
+    return state.customCategories;
+  }
+  return DEFAULT_CATEGORIES;
+}
+
+// CATEGORIES is now a getter for backwards compatibility
+let CATEGORIES = DEFAULT_CATEGORIES;
+function refreshCategories() {
+  CATEGORIES = getCategories();
+  // Update CSS variables + dynamic border rules
+  let dynamicCSS = '';
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    document.documentElement.style.setProperty(`--cat-${key}`, cat.color);
+    dynamicCSS += `.task-item.cat-${key} { border-left-color: ${cat.color}; }\n`;
+  });
+  let styleEl = document.getElementById('dynamicCatStyles');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynamicCatStyles';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = dynamicCSS;
+  // Update filter dropdown
+  populateFilterCats();
+}
+
+function populateFilterCats() {
+  const sel = document.getElementById('filterCat');
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">Alle</option>';
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${cat.emoji || ''} ${cat.label.replace(/^[^\s]+\s/, '')}`;
+    sel.appendChild(opt);
+  });
+  sel.value = currentVal;
+}
+
 const CAT_SHORTCUTS = { 'r:': 'rossbacher', 'ki:': 'ki', 'k:': 'kreativ', 'f:': 'familie', 'p:': 'persoenlich' };
+
+// ========== Auto-Category Detection ==========
+const AUTO_CAT_KEYWORDS = {
+  rossbacher: ['rossbacher','büro','office','meeting','chef','kollege','kollegin','arbeit','projekt','deadline','präsentation','email','mail','angebot','kunde','kundin','rechnung','lieferung','lieferschein','bestellung','firma','geschäft','call','zoom','teams','anruf','besprechung','protokoll','kunden','auftrag','lager','versand','buchhaltung','steuer','mitarbeiter','rechnungen','gehalt','umsatz','vertrag','lieferant'],
+  ki: ['ki','ai','python','code','programmier','lernen','kurs','tutorial','claude','chatgpt','machine learning','neural','daten','api','prompt','openai','anthropic','model','training','chatbot','algorithmus','deep learning','tensorflow','pytorch','notebook','jupyter','gpt','llm','copilot','automation','bot'],
+  kreativ: ['schreib','buch','lesen','blog','zeichn','malen','foto','video','musik','design','kreativ','gedicht','tagebuch','journal','roman','geschichte','text','artikel','notiz','brainstorm','idee','skizze','aquarell','kalligraph','poesie','lyrics','song','album','podcast','youtube','content','essay'],
+  familie: ['letizia','mama','papa','schwester','bruder','oma','opa','kindergarten','schule','kind','kinder','familie','eltern','geburtstag','familien','abend','gemeinsam','spielen','vorlesen','basteln','kochen zusammen','ausflug','zoo','spielplatz','kinderarzt','kita','abholen','bringen','wochenende','großeltern','onkel','tante','nichte','neffe','babysitter'],
+  persoenlich: ['yoga','meditation','sport','laufen','gym','fitness','arzt','termin','zahnarzt','friseur','wohnung','putzen','waschen','bügeln','kochen','einkauf','staubsaugen','aufräumen','bad','dusche','schlaf','ruhe','spazier','natur','garten','balkon','apotheke','rezept','therapie','massage','sauna','schwimmen','radfahren','wandern','wellness','entspann','self-care','pause','auszeit']
+};
+
+function autoDetectCategory(text) {
+  const lower = text.toLowerCase();
+
+  // First check learned keywords (user corrections)
+  if (state.learnedKeywords) {
+    for (const [word, catId] of Object.entries(state.learnedKeywords)) {
+      if (lower.includes(word.toLowerCase())) {
+        return { cat: catId, confidence: 'learned', keyword: word };
+      }
+    }
+  }
+
+  // Then check built-in keywords
+  const scores = {};
+  for (const [catId, keywords] of Object.entries(AUTO_CAT_KEYWORDS)) {
+    scores[catId] = 0;
+    for (const kw of keywords) {
+      if (lower.includes(kw)) {
+        scores[catId] += kw.length; // Longer match = higher confidence
+      }
+    }
+  }
+
+  // Also check custom category keywords
+  if (state.customCatKeywords) {
+    for (const [catId, keywords] of Object.entries(state.customCatKeywords)) {
+      if (!scores[catId]) scores[catId] = 0;
+      for (const kw of keywords) {
+        if (lower.includes(kw.toLowerCase())) {
+          scores[catId] += kw.length;
+        }
+      }
+    }
+  }
+
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  if (best && best[1] > 0) {
+    return { cat: best[0], confidence: best[1] > 8 ? 'high' : 'low' };
+  }
+  return null;
+}
+
+let autoDetectedCat = null;
+
+function onQuickAddInput() {
+  const text = document.getElementById('quickAddInput').value.trim();
+  const hint = document.getElementById('catAutoHint');
+
+  if (text.length < 3) {
+    hint.classList.remove('visible');
+    autoDetectedCat = null;
+    return;
+  }
+
+  // Check shortcuts first
+  for (const [prefix, catId] of Object.entries(CAT_SHORTCUTS)) {
+    if (text.toLowerCase().startsWith(prefix)) {
+      autoDetectedCat = catId;
+      const catInfo = CATEGORIES[catId];
+      hint.innerHTML = `${catInfo?.emoji || ''} ${catInfo?.label.replace(/^[^\s]+\s/, '') || catId}`;
+      hint.classList.add('visible');
+      return;
+    }
+  }
+
+  const result = autoDetectCategory(text);
+  if (result && CATEGORIES[result.cat]) {
+    autoDetectedCat = result.cat;
+    const catInfo = CATEGORIES[result.cat];
+    const conf = result.confidence === 'learned' ? ' (gelernt)' : '';
+    hint.innerHTML = `${catInfo.emoji || ''} ${catInfo.label.replace(/^[^\s]+\s/, '')}${conf}`;
+    hint.classList.add('visible');
+  } else {
+    autoDetectedCat = null;
+    hint.classList.remove('visible');
+  }
+}
+
+// ========== Category Pill Picker ==========
+function renderCatPills(containerId, selectedCat) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let html = '';
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const selected = key === selectedCat ? 'selected' : '';
+    html += `<button type="button" class="cat-pill ${selected}" onclick="selectCatPill('${containerId}', '${key}')" data-cat="${key}">
+      <span class="cat-dot" style="background:${cat.color};"></span>
+      ${cat.emoji || ''} ${cat.label.replace(/^[^\s]+\s/, '')}
+    </button>`;
+  });
+  html += `<button type="button" class="cat-pill-add" onclick="openCatManager()">+</button>`;
+  container.innerHTML = html;
+}
+
+function selectCatPill(containerId, catId) {
+  const container = document.getElementById(containerId);
+  container.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  container.querySelector(`[data-cat="${catId}"]`)?.classList.add('selected');
+  // Update hidden input
+  document.getElementById('tfCat').value = catId;
+}
+
+// ========== Category Manager ==========
+const CAT_EMOJIS = ['🏢','🤖','📖','👨‍👩‍👧','🧘','💼','🎯','🏠','💪','🎨','📚','💡','🌱','🎵','🏋️','🍳','✈️','💰','❤️','🎓','🔧','📱','🛒','⭐','🌍','🧠','📝','🎮','🐾','🌸'];
+const CAT_COLORS = ['#4a90d9','#9b6dd7','#c9a84c','#d9739e','#4ecdc4','#ef5350','#66bb6a','#ff7043','#ab47bc','#5c6bc0','#26a69a','#ffa726','#8d6e63','#78909c','#ec407a','#7e57c2'];
+
+let editingCats = {};
+let emojiPickerTarget = null;
+let colorPickerTarget = null;
+
+function openCatManager() {
+  editingCats = JSON.parse(JSON.stringify(CATEGORIES));
+  // Ensure all cats have emoji field
+  Object.entries(editingCats).forEach(([key, cat]) => {
+    if (!cat.emoji) {
+      const match = cat.label.match(/^(\S+)/);
+      cat.emoji = match ? match[1] : '📌';
+    }
+    if (!cat.name) {
+      cat.name = cat.label.replace(/^[^\s]+\s/, '');
+    }
+  });
+  renderCatManager();
+  document.getElementById('catManagerOverlay').classList.add('open');
+}
+
+function closeCatManager() {
+  document.getElementById('catManagerOverlay').classList.remove('open');
+}
+
+function renderCatManager() {
+  const container = document.getElementById('catManagerList');
+  let html = '';
+  Object.entries(editingCats).forEach(([key, cat]) => {
+    const name = cat.name || cat.label.replace(/^[^\s]+\s/, '');
+    html += `<div class="cat-edit-item" data-catkey="${key}">
+      <button type="button" class="cat-emoji-btn" onclick="toggleEmojiPicker('${key}')">${cat.emoji || '📌'}</button>
+      <input type="text" value="${esc(name)}" oninput="editingCats['${key}'].name=this.value" placeholder="Kategorie-Name" autocomplete="off">
+      <button type="button" class="cat-color-btn" style="background:${cat.color};" onclick="toggleColorPicker('${key}')"></button>
+      ${Object.keys(editingCats).length > 1 ? `<button type="button" class="cat-del-btn" onclick="deleteCatFromManager('${key}')">✕</button>` : ''}
+    </div>
+    <div class="emoji-grid" id="emojiPicker-${key}" style="display:none;"></div>
+    <div class="color-grid" id="colorPicker-${key}" style="display:none;"></div>`;
+  });
+  container.innerHTML = html;
+}
+
+function toggleEmojiPicker(catKey) {
+  const picker = document.getElementById(`emojiPicker-${catKey}`);
+  const wasOpen = picker.style.display !== 'none';
+  // Close all pickers
+  document.querySelectorAll('.emoji-grid, .color-grid').forEach(p => p.style.display = 'none');
+  if (wasOpen) return;
+  let html = '';
+  CAT_EMOJIS.forEach(e => {
+    html += `<button type="button" onclick="pickEmoji('${catKey}','${e}')">${e}</button>`;
+  });
+  picker.innerHTML = html;
+  picker.style.display = 'grid';
+}
+
+function pickEmoji(catKey, emoji) {
+  editingCats[catKey].emoji = emoji;
+  document.getElementById(`emojiPicker-${catKey}`).style.display = 'none';
+  renderCatManager();
+}
+
+function toggleColorPicker(catKey) {
+  const picker = document.getElementById(`colorPicker-${catKey}`);
+  const wasOpen = picker.style.display !== 'none';
+  document.querySelectorAll('.emoji-grid, .color-grid').forEach(p => p.style.display = 'none');
+  if (wasOpen) return;
+  let html = '';
+  CAT_COLORS.forEach(c => {
+    const selected = editingCats[catKey].color === c ? 'selected' : '';
+    html += `<button type="button" class="color-swatch ${selected}" style="background:${c};" onclick="pickColor('${catKey}','${c}')"></button>`;
+  });
+  picker.innerHTML = html;
+  picker.style.display = 'flex';
+}
+
+function pickColor(catKey, color) {
+  editingCats[catKey].color = color;
+  document.getElementById(`colorPicker-${catKey}`).style.display = 'none';
+  renderCatManager();
+}
+
+function addNewCategory() {
+  const id = 'cat_' + Date.now();
+  editingCats[id] = {
+    label: '📌 Neu',
+    emoji: '📌',
+    name: 'Neu',
+    color: CAT_COLORS[Object.keys(editingCats).length % CAT_COLORS.length]
+  };
+  renderCatManager();
+  // Focus the new input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.cat-edit-item input');
+    const last = inputs[inputs.length - 1];
+    if (last) { last.focus(); last.select(); }
+  }, 50);
+}
+
+function deleteCatFromManager(catKey) {
+  delete editingCats[catKey];
+  renderCatManager();
+}
+
+function saveCatManager() {
+  // Build final categories
+  const newCats = {};
+  Object.entries(editingCats).forEach(([key, cat]) => {
+    const name = (cat.name || 'Neu').trim();
+    newCats[key] = {
+      label: `${cat.emoji} ${name}`,
+      emoji: cat.emoji,
+      color: cat.color,
+      name: name
+    };
+  });
+  state.customCategories = newCats;
+
+  // Update shortcuts for new categories
+  // Keep existing shortcuts, add first-letter shortcuts for new ones
+  const usedLetters = new Set(Object.keys(CAT_SHORTCUTS).map(k => k[0]));
+  Object.keys(newCats).forEach(key => {
+    const firstLetter = key[0];
+    if (!usedLetters.has(firstLetter) && !CAT_SHORTCUTS[firstLetter + ':']) {
+      CAT_SHORTCUTS[firstLetter + ':'] = key;
+    }
+  });
+
+  saveState();
+  refreshCategories();
+  closeCatManager();
+  renderTasks();
+
+  // Re-render pills if form is open
+  const formPills = document.getElementById('tfCatPills');
+  if (formPills) {
+    renderCatPills('tfCatPills', document.getElementById('tfCat').value);
+  }
+}
+
+// ========== Learning from corrections ==========
+function learnCategoryCorrection(taskTitle, newCat, oldCat) {
+  if (newCat === oldCat) return;
+  if (!state.learnedKeywords) state.learnedKeywords = {};
+
+  // Extract meaningful words from the title (3+ chars)
+  const words = taskTitle.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+
+  // Check which words are NOT in the auto-detect keywords for the new category
+  const existingKw = AUTO_CAT_KEYWORDS[newCat] || [];
+  const customKw = (state.customCatKeywords && state.customCatKeywords[newCat]) || [];
+  const allExisting = [...existingKw, ...customKw];
+
+  words.forEach(word => {
+    if (!allExisting.includes(word)) {
+      state.learnedKeywords[word] = newCat;
+    }
+  });
+  saveState();
+}
 
 // ========== Shop Category Mapping ==========
 const SHOP_CATEGORIES = {
@@ -1552,13 +2010,24 @@ function quickAddTask() {
   let text = input.value.trim();
   if (!text) return;
 
-  let cat = 'rossbacher';
+  // 1. Check shortcut prefixes first
+  let cat = null;
   for (const [prefix, catId] of Object.entries(CAT_SHORTCUTS)) {
     if (text.toLowerCase().startsWith(prefix)) {
       cat = catId;
       text = text.substring(prefix.length).trim();
       break;
     }
+  }
+
+  // 2. If no shortcut, use auto-detection
+  if (!cat) {
+    cat = autoDetectedCat || null;
+  }
+
+  // 3. If still nothing, use first category as default
+  if (!cat) {
+    cat = Object.keys(CATEGORIES)[0] || 'persoenlich';
   }
 
   const task = {
@@ -1576,6 +2045,8 @@ function quickAddTask() {
   };
   state.tasks.unshift(task);
   input.value = '';
+  autoDetectedCat = null;
+  document.getElementById('catAutoHint').classList.remove('visible');
   saveState();
   renderTasks();
   updateStats();
@@ -1584,6 +2055,7 @@ function quickAddTask() {
 function openTaskForm(editId) {
   const overlay = document.getElementById('taskFormOverlay');
   overlay.classList.add('open');
+  const defaultCat = Object.keys(CATEGORIES)[0] || 'rossbacher';
   if (editId) {
     const t = state.tasks.find(t => t.id === editId);
     if (!t) return;
@@ -1594,16 +2066,26 @@ function openTaskForm(editId) {
     document.getElementById('tfPrio').value = t.prio;
     document.getElementById('tfDate').value = t.due || '';
     document.getElementById('tfEditId').value = editId;
+    renderCatPills('tfCatPills', t.cat);
   } else {
     document.getElementById('taskFormTitle').textContent = 'Neue Aufgabe';
     document.getElementById('tfTitle').value = '';
     document.getElementById('tfDesc').value = '';
-    document.getElementById('tfCat').value = 'rossbacher';
+    document.getElementById('tfCat').value = defaultCat;
     document.getElementById('tfPrio').value = 'medium';
     document.getElementById('tfDate').value = '';
     document.getElementById('tfEditId').value = '';
+    renderCatPills('tfCatPills', autoDetectedCat || defaultCat);
   }
-  setTimeout(() => document.getElementById('tfTitle').focus(), 100);
+  // Add auto-detect to title input in form
+  const tfTitle = document.getElementById('tfTitle');
+  tfTitle.oninput = function() {
+    const result = autoDetectCategory(this.value);
+    if (result && CATEGORIES[result.cat]) {
+      selectCatPill('tfCatPills', result.cat);
+    }
+  };
+  setTimeout(() => tfTitle.focus(), 100);
 }
 
 function closeTaskForm() {
@@ -1618,15 +2100,19 @@ function saveTask() {
   const title = document.getElementById('tfTitle').value.trim();
   if (!title) return;
   const editId = document.getElementById('tfEditId').value;
+  const newCat = document.getElementById('tfCat').value;
 
   if (editId) {
     const t = state.tasks.find(t => t.id === editId);
     if (t) {
+      const oldCat = t.cat;
       t.title = title;
       t.desc = document.getElementById('tfDesc').value.trim();
-      t.cat = document.getElementById('tfCat').value;
+      t.cat = newCat;
       t.prio = document.getElementById('tfPrio').value;
       t.due = document.getElementById('tfDate').value;
+      // Learn from category corrections
+      learnCategoryCorrection(title, newCat, oldCat);
     }
   } else {
     state.tasks.unshift({
@@ -3176,6 +3662,10 @@ init = function() {
   if (!state.moodLog) state.moodLog = {};
   if (!state.energyLog) state.energyLog = [];
   if (!state.letters) state.letters = [];
+  if (!state.learnedKeywords) state.learnedKeywords = {};
+  if (!state.customCatKeywords) state.customCatKeywords = {};
+  // Load custom categories
+  refreshCategories();
   checkMoodOnOpen();
 };
 
