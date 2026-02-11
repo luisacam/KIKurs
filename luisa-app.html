@@ -627,6 +627,121 @@ textarea { min-height: 80px; resize: vertical; }
 }
 .stamm-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
 .hidden { display: none !important; }
+
+/* ========== Claude Chat ========== */
+.chat-fab {
+  position: fixed;
+  bottom: 80px; right: 16px;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #e0c068);
+  color: #141821;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  z-index: 150;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.chat-fab:hover { transform: scale(1.08); }
+@media (min-width: 768px) { .chat-fab { bottom: 24px; right: 24px; } }
+
+.chat-panel {
+  display: none;
+  position: fixed;
+  bottom: 0; right: 0;
+  width: 100%; height: 85vh;
+  background: var(--bg);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: var(--shadow-lg);
+  z-index: 300;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+.chat-panel.open { display: flex; }
+@media (min-width: 768px) {
+  .chat-panel {
+    width: 420px; height: 560px;
+    bottom: 24px; right: 24px;
+    border-radius: var(--radius);
+  }
+}
+.chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.chat-header h3 { color: var(--accent); font-size: 1.1rem; margin: 0; }
+.chat-header-actions { display: flex; gap: 4px; }
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-msg {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.chat-msg.user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #141821;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.assistant {
+  align-self: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.chat-msg.system {
+  align-self: center;
+  background: var(--accent-glow);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.chat-msg.typing::after {
+  content: '●●●';
+  animation: blink 1s infinite;
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+.chat-input-bar {
+  display: flex; gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.chat-input-bar input {
+  flex: 1;
+  min-height: 48px;
+}
+.chat-input-bar .btn { min-width: 54px; }
+
+/* API Key Setup */
+.chat-setup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 14px;
+  text-align: center;
+}
+.chat-setup p { color: var(--text-muted); font-size: 0.92rem; }
+.chat-setup input { max-width: 340px; }
+.chat-setup .btn { max-width: 340px; width: 100%; }
 </style>
 </head>
 <body>
@@ -858,6 +973,28 @@ textarea { min-height: 80px; resize: vertical; }
       <button class="btn btn-secondary" onclick="closeTaskForm()">Abbrechen</button>
       <button class="btn btn-primary" onclick="saveTask()">Speichern</button>
     </div>
+  </div>
+</div>
+
+<!-- Claude Chat FAB -->
+<button class="chat-fab" onclick="toggleChat()" id="chatFab" title="Claude fragen">💬</button>
+
+<!-- Claude Chat Panel -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <h3>💬 Claude</h3>
+    <div class="chat-header-actions">
+      <button class="btn-icon" onclick="clearChat()" title="Chat leeren">🗑️</button>
+      <button class="btn-icon" onclick="openApiKeySetup()" title="API-Key">🔑</button>
+      <button class="btn-icon" onclick="toggleChat()" title="Schließen">✕</button>
+    </div>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <!-- Setup or Messages -->
+  </div>
+  <div class="chat-input-bar" id="chatInputBar" style="display:none;">
+    <input type="text" id="chatInput" placeholder="Frag mich etwas..." autocomplete="off" spellcheck="false">
+    <button class="btn btn-primary" onclick="sendChat()" id="chatSendBtn">➤</button>
   </div>
 </div>
 
@@ -1897,6 +2034,9 @@ function setupKeyListeners() {
   document.getElementById('tfTitle').addEventListener('keydown', e => {
     if (e.key === 'Enter') saveTask();
   });
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) sendChat();
+  });
 }
 
 // ========== Auto-Save on close ==========
@@ -1914,6 +2054,166 @@ function esc(s) {
   const div = document.createElement('div');
   div.textContent = s;
   return div.innerHTML;
+}
+
+// ========== Claude Chat ==========
+let chatMessages = [];
+let chatApiKey = localStorage.getItem('luisa-claude-key') || '';
+
+function toggleChat() {
+  const panel = document.getElementById('chatPanel');
+  const fab = document.getElementById('chatFab');
+  panel.classList.toggle('open');
+  fab.style.display = panel.classList.contains('open') ? 'none' : 'flex';
+  if (panel.classList.contains('open')) {
+    if (!chatApiKey) {
+      showApiKeySetup();
+    } else {
+      showChatView();
+      setTimeout(() => document.getElementById('chatInput').focus(), 100);
+    }
+  }
+}
+
+function showApiKeySetup() {
+  document.getElementById('chatInputBar').style.display = 'none';
+  document.getElementById('chatMessages').innerHTML = `
+    <div class="chat-setup">
+      <div style="font-size:2.5rem;">🔑</div>
+      <h3 style="color:var(--accent);">Claude verbinden</h3>
+      <p>Du brauchst einen Anthropic API-Key.<br>Den findest du auf <strong>console.anthropic.com</strong></p>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" style="width:100%;">
+      <button class="btn btn-primary" onclick="saveApiKey()">Verbinden</button>
+      <p style="font-size:0.8rem;color:var(--text-dim);">Dein Key bleibt nur lokal auf diesem Gerät gespeichert.</p>
+    </div>`;
+}
+
+function openApiKeySetup() { showApiKeySetup(); }
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  chatApiKey = key;
+  localStorage.setItem('luisa-claude-key', key);
+  showChatView();
+}
+
+function showChatView() {
+  document.getElementById('chatInputBar').style.display = 'flex';
+  renderChatMessages();
+  if (chatMessages.length === 0) {
+    addChatMsg('system', 'Hallo Luisa! Ich bin Claude. Ich kann dir bei deinen Aufgaben helfen, Ideen geben oder einfach plaudern. 💛');
+  }
+}
+
+function addChatMsg(role, text) {
+  chatMessages.push({ role, text });
+  renderChatMessages();
+}
+
+function renderChatMessages() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = chatMessages.map(m =>
+    `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`
+  ).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function getTaskContext() {
+  const today = todayStr();
+  const pending = state.tasks.filter(t => !t.done);
+  const todayTasks = pending.filter(t => t.due === today);
+  const overdue = pending.filter(t => t.due && t.due < today);
+  const high = pending.filter(t => t.prio === 'high');
+
+  let ctx = `Luisas aktuelle Situation:\n`;
+  ctx += `- ${pending.length} offene Aufgaben`;
+  if (todayTasks.length) ctx += `, davon ${todayTasks.length} heute fällig`;
+  if (overdue.length) ctx += `, ${overdue.length} überfällig`;
+  ctx += `\n- Streak: ${state.streak.current} Tage\n`;
+  if (high.length) {
+    ctx += `- Hohe Priorität: ${high.map(t => t.title).join(', ')}\n`;
+  }
+  if (todayTasks.length) {
+    ctx += `- Heute: ${todayTasks.map(t => t.title).join(', ')}\n`;
+  }
+  ctx += `\nKategorien: Rossbacher (Firma), KI & Lernen, Kreativ (Kinderbuch), Familie (Tochter Letizia), Persönlich (Philosophie/Advaita Vedanta)\n`;
+  return ctx;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  addChatMsg('user', text);
+
+  // Show typing
+  const container = document.getElementById('chatMessages');
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg assistant typing';
+  container.appendChild(typing);
+  container.scrollTop = container.scrollHeight;
+
+  const sendBtn = document.getElementById('chatSendBtn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = '…';
+
+  try {
+    const systemPrompt = `Du bist Luisas persönliche KI-Assistentin in ihrer Produktivitäts-App. Du bist warmherzig, ermutigend und auf Deutsch. Du kennst Luisas Lebensbereiche: Rossbacher (Familienunternehmen, Brennstoffhandel & Entsorgung in Osttirol), KI-Projekte, ein Kinderbuch das sie schreibt, ihre Tochter Letizia, und Advaita Vedanta Philosophie. Sei kurz und hilfreich. Wenn es um Aufgaben geht, hilf beim Priorisieren, Aufteilen in Schritte, oder gib Tipps.\n\n${getTaskContext()}`;
+
+    const apiMessages = chatMessages
+      .filter(m => m.role !== 'system')
+      .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': chatApiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: apiMessages
+      })
+    });
+
+    typing.remove();
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      if (resp.status === 401) {
+        addChatMsg('system', 'API-Key ungültig. Bitte überprüfe deinen Key. 🔑');
+        chatApiKey = '';
+        localStorage.removeItem('luisa-claude-key');
+        setTimeout(showApiKeySetup, 1500);
+      } else {
+        addChatMsg('system', `Fehler: ${err.error?.message || resp.statusText}`);
+      }
+      return;
+    }
+
+    const data = await resp.json();
+    const reply = data.content[0]?.text || 'Keine Antwort erhalten.';
+    addChatMsg('assistant', reply);
+
+  } catch (e) {
+    typing.remove();
+    addChatMsg('system', 'Verbindungsfehler – bist du online? 🌐');
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = '➤';
+  }
+}
+
+function clearChat() {
+  chatMessages = [];
+  showChatView();
 }
 
 // ========== Start ==========
