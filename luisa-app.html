@@ -742,6 +742,82 @@ textarea { min-height: 80px; resize: vertical; }
 .chat-setup p { color: var(--text-muted); font-size: 0.92rem; }
 .chat-setup input { max-width: 340px; }
 .chat-setup .btn { max-width: 340px; width: 100%; }
+
+/* Chat Quick Actions */
+.chat-quick-actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 16px 0;
+  flex-shrink: 0;
+}
+.chat-qa-btn {
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.chat-qa-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+/* Action Cards in Chat */
+.chat-action-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+.chat-action-card .action-title {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+.chat-action-card .action-detail {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.chat-action-card .action-items {
+  list-style: none;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+}
+.chat-action-card .action-items li {
+  padding: 3px 0;
+  color: var(--text-muted);
+}
+.chat-action-card .action-items li::before {
+  content: '→ ';
+  color: var(--accent);
+}
+.action-accept-btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #141821;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-right: 6px;
+}
+.action-accept-btn:hover { filter: brightness(1.1); }
+.action-dismiss-btn {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -988,6 +1064,12 @@ textarea { min-height: 80px; resize: vertical; }
       <button class="btn-icon" onclick="openApiKeySetup()" title="API-Key">🔑</button>
       <button class="btn-icon" onclick="toggleChat()" title="Schließen">✕</button>
     </div>
+  </div>
+  <div class="chat-quick-actions" id="chatQuickActions" style="display:none;">
+    <button class="chat-qa-btn" onclick="quickAction('tagesplan')">🗓️ Mein Tag</button>
+    <button class="chat-qa-btn" onclick="quickAction('aufteilen')">✂️ Aufgabe aufteilen</button>
+    <button class="chat-qa-btn" onclick="quickAction('einkauf')">🛒 Was kochen?</button>
+    <button class="chat-qa-btn" onclick="quickAction('motivation')">💛 Aufmuntern</button>
   </div>
   <div class="chat-messages" id="chatMessages">
     <!-- Setup or Messages -->
@@ -2059,6 +2141,7 @@ function esc(s) {
 // ========== Claude Chat ==========
 let chatMessages = [];
 let chatApiKey = localStorage.getItem('luisa-claude-key') || '';
+let pendingActions = [];
 
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
@@ -2077,6 +2160,7 @@ function toggleChat() {
 
 function showApiKeySetup() {
   document.getElementById('chatInputBar').style.display = 'none';
+  document.getElementById('chatQuickActions').style.display = 'none';
   document.getElementById('chatMessages').innerHTML = `
     <div class="chat-setup">
       <div style="font-size:2.5rem;">🔑</div>
@@ -2100,22 +2184,24 @@ function saveApiKey() {
 
 function showChatView() {
   document.getElementById('chatInputBar').style.display = 'flex';
+  document.getElementById('chatQuickActions').style.display = 'flex';
   renderChatMessages();
   if (chatMessages.length === 0) {
-    addChatMsg('system', 'Hallo Luisa! Ich bin Claude. Ich kann dir bei deinen Aufgaben helfen, Ideen geben oder einfach plaudern. 💛');
+    addChatMsg('system', 'Hallo Luisa! Ich kann dir helfen: Aufgaben erstellen, Tagesplan machen, Einkäufe planen — sag mir einfach was du brauchst. 💛');
   }
 }
 
-function addChatMsg(role, text) {
-  chatMessages.push({ role, text });
+function addChatMsg(role, text, html) {
+  chatMessages.push({ role, text, html: html || null });
   renderChatMessages();
 }
 
 function renderChatMessages() {
   const container = document.getElementById('chatMessages');
-  container.innerHTML = chatMessages.map(m =>
-    `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`
-  ).join('');
+  container.innerHTML = chatMessages.map(m => {
+    if (m.html) return m.html;
+    return `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`;
+  }).join('');
   container.scrollTop = container.scrollHeight;
 }
 
@@ -2126,26 +2212,102 @@ function getTaskContext() {
   const overdue = pending.filter(t => t.due && t.due < today);
   const high = pending.filter(t => t.prio === 'high');
 
-  let ctx = `Luisas aktuelle Situation:\n`;
+  let ctx = `HEUTIGES DATUM: ${today}\n\nLuisas aktuelle Situation:\n`;
   ctx += `- ${pending.length} offene Aufgaben`;
   if (todayTasks.length) ctx += `, davon ${todayTasks.length} heute fällig`;
   if (overdue.length) ctx += `, ${overdue.length} überfällig`;
   ctx += `\n- Streak: ${state.streak.current} Tage\n`;
-  if (high.length) {
-    ctx += `- Hohe Priorität: ${high.map(t => t.title).join(', ')}\n`;
+
+  if (pending.length > 0) {
+    ctx += `\nAlle offenen Aufgaben:\n`;
+    pending.forEach(t => {
+      ctx += `  - "${t.title}" [${t.cat}] [Prio: ${t.prio}]${t.due ? ' [Fällig: '+t.due+']' : ''}`;
+      if (t.subtasks && t.subtasks.length > 0) {
+        const stDone = t.subtasks.filter(s=>s.done).length;
+        ctx += ` (${stDone}/${t.subtasks.length} Subtasks)`;
+      }
+      ctx += `\n`;
+    });
   }
-  if (todayTasks.length) {
-    ctx += `- Heute: ${todayTasks.map(t => t.title).join(', ')}\n`;
+
+  const shopOpen = state.shopping.filter(s => !s.checked);
+  if (shopOpen.length > 0) {
+    ctx += `\nOffene Einkäufe: ${shopOpen.map(s => s.name).join(', ')}\n`;
   }
-  ctx += `\nKategorien: Rossbacher (Firma), KI & Lernen, Kreativ (Kinderbuch), Familie (Tochter Letizia), Persönlich (Philosophie/Advaita Vedanta)\n`;
+
+  ctx += `\nKategorien (IDs): rossbacher, ki, kreativ, familie, persoenlich\nPrioritäten: high, medium, low\n`;
   return ctx;
 }
 
-async function sendChat() {
+const CHAT_SYSTEM_PROMPT = `Du bist Luisas persönliche KI-Assistentin in ihrer Produktivitäts-App. Du bist warmherzig, ermutigend und sprichst Deutsch. Du kennst Luisas Lebensbereiche: Rossbacher (Familienunternehmen in Osttirol, Brennstoffhandel & Entsorgung), KI-Projekte & Lernen, ein Kinderbuch das sie schreibt, ihre Tochter Letizia und Partner Felix, und Advaita Vedanta Philosophie. Sei kurz und hilfreich.
+
+WICHTIG: Du kannst AKTIONEN ausführen! Wenn Luisa möchte, dass etwas in der App passiert, antworte mit normalem Text UND einem JSON-Block. Der JSON-Block MUSS in einem eigenen Absatz stehen, umgeben von ~~~json und ~~~.
+
+AKTIONEN die du ausführen kannst:
+
+1. AUFGABE ERSTELLEN — wenn Luisa eine Aufgabe erwähnt:
+~~~json
+{"action":"create_task","tasks":[{"title":"...","cat":"rossbacher|ki|kreativ|familie|persoenlich","prio":"high|medium|low","due":"YYYY-MM-DD oder leer","desc":"optional"}]}
+~~~
+
+2. SUBTASKS VORSCHLAGEN — wenn Luisa eine Aufgabe aufteilen möchte:
+~~~json
+{"action":"suggest_subtasks","taskTitle":"Name der bestehenden Aufgabe","subtasks":["Schritt 1","Schritt 2","Schritt 3"]}
+~~~
+
+3. EINKAUFSLISTE — wenn Luisa Lebensmittel/Einkäufe erwähnt:
+~~~json
+{"action":"add_shopping","items":[{"name":"Milch","qty":"2x"},{"name":"Eier","qty":""}]}
+~~~
+
+4. TAGESPLAN — wenn Luisa nach einem Tagesplan fragt:
+~~~json
+{"action":"daily_plan","plan":[{"time":"08:00","task":"...","tip":"..."},{"time":"10:00","task":"...","tip":"..."}]}
+~~~
+
+Regeln:
+- Immer ZUERST freundlichen Text schreiben, DANN den JSON-Block
+- Nur JSON-Blöcke ausgeben wenn eine Aktion nötig ist
+- Kategorien immer als ID angeben (rossbacher, ki, kreativ, familie, persoenlich)
+- Bei Aufgaben ohne klares Datum: due leer lassen
+- Bei unklarer Kategorie: beste Vermutung
+- Sei warm und ermutigend, nie stressig`;
+
+// Quick Action Prompts
+function quickAction(type) {
   const input = document.getElementById('chatInput');
-  const text = input.value.trim();
+  switch(type) {
+    case 'tagesplan':
+      input.value = 'Mach mir bitte einen Tagesplan für heute — was sollte ich wann angehen?';
+      break;
+    case 'aufteilen':
+      const highPrio = state.tasks.filter(t => !t.done && t.prio === 'high' && (!t.subtasks || t.subtasks.length === 0));
+      if (highPrio.length > 0) {
+        input.value = `Kannst du mir die Aufgabe "${highPrio[0].title}" in kleine Schritte aufteilen?`;
+      } else {
+        const open = state.tasks.filter(t => !t.done);
+        if (open.length > 0) {
+          input.value = `Kannst du mir die Aufgabe "${open[0].title}" in kleine Schritte aufteilen?`;
+        } else {
+          input.value = 'Ich habe eine große Aufgabe und brauche Hilfe sie aufzuteilen: ';
+        }
+      }
+      break;
+    case 'einkauf':
+      input.value = 'Ich möchte heute Abend kochen. Was brauche ich für ';
+      break;
+    case 'motivation':
+      input.value = 'Ich brauche gerade etwas Aufmunterung und Motivation 💛';
+      break;
+  }
+  input.focus();
+}
+
+async function sendChat(overrideText) {
+  const input = document.getElementById('chatInput');
+  const text = overrideText || input.value.trim();
   if (!text) return;
-  input.value = '';
+  if (!overrideText) input.value = '';
 
   addChatMsg('user', text);
 
@@ -2161,11 +2323,11 @@ async function sendChat() {
   sendBtn.textContent = '…';
 
   try {
-    const systemPrompt = `Du bist Luisas persönliche KI-Assistentin in ihrer Produktivitäts-App. Du bist warmherzig, ermutigend und auf Deutsch. Du kennst Luisas Lebensbereiche: Rossbacher (Familienunternehmen, Brennstoffhandel & Entsorgung in Osttirol), KI-Projekte, ein Kinderbuch das sie schreibt, ihre Tochter Letizia, und Advaita Vedanta Philosophie. Sei kurz und hilfreich. Wenn es um Aufgaben geht, hilf beim Priorisieren, Aufteilen in Schritte, oder gib Tipps.\n\n${getTaskContext()}`;
+    const systemPrompt = CHAT_SYSTEM_PROMPT + '\n\n' + getTaskContext();
 
     const apiMessages = chatMessages
-      .filter(m => m.role !== 'system')
-      .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({ role: m.role, content: m.text }));
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -2177,7 +2339,7 @@ async function sendChat() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 800,
+        max_tokens: 1200,
         system: systemPrompt,
         messages: apiMessages
       })
@@ -2200,7 +2362,16 @@ async function sendChat() {
 
     const data = await resp.json();
     const reply = data.content[0]?.text || 'Keine Antwort erhalten.';
-    addChatMsg('assistant', reply);
+
+    // Parse actions from response
+    const { textPart, actions } = parseActions(reply);
+
+    addChatMsg('assistant', textPart);
+
+    // Render action cards
+    actions.forEach(action => {
+      renderActionCard(action);
+    });
 
   } catch (e) {
     typing.remove();
@@ -2211,8 +2382,191 @@ async function sendChat() {
   }
 }
 
+function parseActions(text) {
+  const actions = [];
+  let textPart = text;
+
+  // Find ~~~json ... ~~~ blocks
+  const jsonRegex = /~~~json\s*\n?([\s\S]*?)\n?~~~/g;
+  let match;
+  while ((match = jsonRegex.exec(text)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      actions.push(parsed);
+      textPart = textPart.replace(match[0], '').trim();
+    } catch(e) { /* ignore malformed JSON */ }
+  }
+
+  // Also try ```json ... ``` blocks
+  const jsonRegex2 = /```json\s*\n?([\s\S]*?)\n?```/g;
+  while ((match = jsonRegex2.exec(text)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      actions.push(parsed);
+      textPart = textPart.replace(match[0], '').trim();
+    } catch(e) {}
+  }
+
+  return { textPart, actions };
+}
+
+function renderActionCard(action) {
+  const id = 'action-' + Date.now() + Math.random().toString(36).substr(2,4);
+  pendingActions[id] = action;
+  let html = '';
+
+  switch(action.action) {
+    case 'create_task':
+      const taskList = action.tasks.map(t =>
+        `<li>${esc(t.title)} <span style="color:var(--text-dim);">[${CATEGORIES[t.cat]?.label || t.cat}${t.prio === 'high' ? ' 🔴' : ''}${t.due ? ' 📅'+t.due : ''}]</span></li>`
+      ).join('');
+      html = `<div class="chat-action-card">
+        <div class="action-title">📋 ${action.tasks.length > 1 ? action.tasks.length + ' Aufgaben' : 'Neue Aufgabe'} erstellen</div>
+        <ul class="action-items">${taskList}</ul>
+        <button class="action-accept-btn" onclick="acceptAction('${id}')">✓ Übernehmen</button>
+        <button class="action-dismiss-btn" onclick="dismissAction('${id}')">Nein danke</button>
+      </div>`;
+      break;
+
+    case 'suggest_subtasks':
+      const stList = action.subtasks.map(s => `<li>${esc(s)}</li>`).join('');
+      html = `<div class="chat-action-card">
+        <div class="action-title">✂️ Subtasks für "${esc(action.taskTitle)}"</div>
+        <ul class="action-items">${stList}</ul>
+        <button class="action-accept-btn" onclick="acceptAction('${id}')">✓ Alle hinzufügen</button>
+        <button class="action-dismiss-btn" onclick="dismissAction('${id}')">Nein danke</button>
+      </div>`;
+      break;
+
+    case 'add_shopping':
+      const shopList = action.items.map(i => `<li>${esc(i.name)}${i.qty ? ' ('+esc(i.qty)+')' : ''}</li>`).join('');
+      html = `<div class="chat-action-card">
+        <div class="action-title">🛒 ${action.items.length} Artikel zur Einkaufsliste</div>
+        <ul class="action-items">${shopList}</ul>
+        <button class="action-accept-btn" onclick="acceptAction('${id}')">✓ Zur Liste hinzufügen</button>
+        <button class="action-dismiss-btn" onclick="dismissAction('${id}')">Nein danke</button>
+      </div>`;
+      break;
+
+    case 'daily_plan':
+      const planList = action.plan.map(p => `<li><strong>${esc(p.time)}</strong> ${esc(p.task)}${p.tip ? ' <span style="color:var(--text-dim);">– '+esc(p.tip)+'</span>' : ''}</li>`).join('');
+      html = `<div class="chat-action-card">
+        <div class="action-title">🗓️ Dein Tagesplan</div>
+        <ul class="action-items">${planList}</ul>
+        <button class="action-accept-btn" onclick="acceptAction('${id}')">✓ Als Aufgaben übernehmen</button>
+        <button class="action-dismiss-btn" onclick="dismissAction('${id}')">Nur anschauen</button>
+      </div>`;
+      break;
+
+    default: return;
+  }
+
+  chatMessages.push({ role: 'assistant', text: '', html });
+  renderChatMessages();
+}
+
+function acceptAction(id) {
+  const action = pendingActions[id];
+  if (!action) return;
+
+  const today = todayStr();
+
+  switch(action.action) {
+    case 'create_task':
+      action.tasks.forEach(t => {
+        state.tasks.unshift({
+          id: genId(),
+          title: t.title,
+          desc: t.desc || '',
+          cat: t.cat || 'persoenlich',
+          prio: t.prio || 'medium',
+          due: t.due || '',
+          done: false,
+          doneDate: null,
+          quickTask: false,
+          subtasks: [],
+          createdAt: Date.now()
+        });
+      });
+      addChatMsg('system', `✓ ${action.tasks.length > 1 ? action.tasks.length + ' Aufgaben' : 'Aufgabe'} erstellt!`);
+      break;
+
+    case 'suggest_subtasks':
+      const task = state.tasks.find(t => t.title.toLowerCase().includes(action.taskTitle.toLowerCase()) && !t.done);
+      if (task) {
+        if (!task.subtasks) task.subtasks = [];
+        action.subtasks.forEach(s => {
+          task.subtasks.push({ text: s, done: false });
+        });
+        addChatMsg('system', `✓ ${action.subtasks.length} Schritte zu "${task.title}" hinzugefügt!`);
+      } else {
+        addChatMsg('system', `Aufgabe "${action.taskTitle}" nicht gefunden — erstelle sie zuerst.`);
+      }
+      break;
+
+    case 'add_shopping':
+      action.items.forEach(item => {
+        state.shopping.push({
+          id: genId(),
+          name: item.name,
+          qty: item.qty || '',
+          cat: guessShopCat(item.name),
+          checked: false
+        });
+      });
+      addChatMsg('system', `✓ ${action.items.length} Artikel zur Einkaufsliste hinzugefügt!`);
+      renderShopList();
+      break;
+
+    case 'daily_plan':
+      action.plan.forEach(p => {
+        state.tasks.unshift({
+          id: genId(),
+          title: p.task,
+          desc: p.tip || '',
+          cat: 'persoenlich',
+          prio: 'medium',
+          due: today,
+          done: false,
+          doneDate: null,
+          quickTask: false,
+          subtasks: [],
+          createdAt: Date.now()
+        });
+      });
+      addChatMsg('system', `✓ ${action.plan.length} Tages-Aufgaben erstellt!`);
+      break;
+  }
+
+  saveState();
+  renderTasks();
+  updateStats();
+  delete pendingActions[id];
+
+  // Update the card to show accepted
+  const btn = document.querySelector(`[onclick="acceptAction('${id}')"]`);
+  if (btn) {
+    btn.closest('.chat-action-card').style.opacity = '0.5';
+    btn.textContent = '✓ Erledigt!';
+    btn.disabled = true;
+    const dismiss = btn.nextElementSibling;
+    if (dismiss) dismiss.remove();
+  }
+}
+
+function dismissAction(id) {
+  delete pendingActions[id];
+  const btn = document.querySelector(`[onclick="dismissAction('${id}')"]`);
+  if (btn) {
+    const card = btn.closest('.chat-action-card');
+    card.style.opacity = '0.3';
+    card.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:6px;">Übersprungen</div>';
+  }
+}
+
 function clearChat() {
   chatMessages = [];
+  pendingActions = [];
   showChatView();
 }
 
