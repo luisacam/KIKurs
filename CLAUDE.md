@@ -6,7 +6,7 @@ This document provides context and guidelines for AI assistants working on the K
 
 **KIKurs** is an educational course repository for learning AI (Künstliche Intelligenz) and Machine Learning fundamentals. The course is in German and includes lessons, exercises, and code examples.
 
-**Current Status:** Complete course with 4 lessons.
+**Current Status:** Complete course with 5 lessons.
 
 ## Repository Structure
 
@@ -16,19 +16,31 @@ KIKurs/
 │   ├── 01-einfuehrung/         # Lesson 1: Introduction to AI
 │   ├── 02-ml-grundlagen/       # Lesson 2: Machine Learning Basics
 │   ├── 03-neuronale-netze/     # Lesson 3: Neural Networks
-│   └── 04-praxis/              # Lesson 4: Practical Applications
+│   ├── 04-praxis/              # Lesson 4: Practical Applications
+│   └── 05-deep-learning/       # Lesson 5: Deep Learning
 ├── uebungen/                   # Exercises for each lesson
 │   ├── 01-einfuehrung/
 │   ├── 02-ml-grundlagen/
 │   ├── 03-neuronale-netze/
-│   └── 04-praxis/
+│   ├── 04-praxis/
+│   └── 05-deep-learning/
+├── notebooks/                  # Interactive Jupyter notebooks
+│   ├── 01-einfuehrung.ipynb
+│   ├── 02-ml-grundlagen.ipynb
+│   ├── 03-neuronale-netze.ipynb
+│   └── 04-praxis.ipynb
 ├── beispiele/                  # Code examples
 │   ├── hallo_ki.py             # Simple rule-based chatbot
 │   ├── neuron_demo.py          # Neuron and neural network demo
 │   ├── iris_klassifikation.py  # Iris flower classification
-│   └── studenten_vorhersage.py # Student success prediction
+│   ├── studenten_vorhersage.py # Student success prediction
+│   └── deep_learning_demo.py   # Deep learning demonstration
+├── projekte/                   # Capstone project guidelines
+├── quiz/                       # Interactive course quizzes
+│   └── ki_quiz.py
 ├── daten/                      # Datasets for exercises
-│   └── studenten.csv           # Sample dataset
+│   ├── studenten.csv           # Student dataset
+│   └── wetter.csv              # Weather dataset
 ├── requirements.txt            # Python dependencies
 ├── CLAUDE.md                   # This file - AI assistant guidelines
 └── README.md                   # Project description and setup
@@ -41,6 +53,7 @@ The course covers:
 2. **Machine Learning Grundlagen** - Supervised/unsupervised learning
 3. **Neuronale Netze** - How neural networks work
 4. **Praktische Anwendungen** - AI in practice
+5. **Deep Learning** - Deep neural networks and advanced techniques
 
 ## Development Workflow
 
@@ -146,4 +159,4 @@ This CLAUDE.md should be kept up-to-date as the project evolves:
 
 ---
 
-*Last updated: 2026-02-04*
+*Last updated: 2026-03-01*

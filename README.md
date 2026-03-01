@@ -10,6 +10,7 @@ Ein praktischer Kurs zum Erlernen von KI und Machine Learning Grundlagen.
 2. **Machine Learning Grundlagen** - Überwachtes und unüberwachtes Lernen
 3. **Neuronale Netze** - Wie funktionieren sie?
 4. **Praktische Anwendungen** - KI im Alltag
+5. **Deep Learning** - Tiefe neuronale Netze und fortgeschrittene Techniken
 
 ### Struktur
 
@@ -19,9 +20,13 @@ KIKurs/
 │   ├── 01-einfuehrung/
 │   ├── 02-ml-grundlagen/
 │   ├── 03-neuronale-netze/
-│   └── 04-praxis/
+│   ├── 04-praxis/
+│   └── 05-deep-learning/
 ├── uebungen/            # Praktische Aufgaben
+├── notebooks/           # Interaktive Jupyter Notebooks
 ├── beispiele/           # Code-Beispiele zum Ausprobieren
+├── projekte/            # Abschlussprojekte
+├── quiz/                # Interaktive Quizfragen
 └── daten/               # Datensätze für Übungen
 ```
 
@@ -51,7 +56,9 @@ pip install -r requirements.txt
 
 1. Starte mit der ersten Lektion in `lektionen/01-einfuehrung/`
 2. Bearbeite die zugehörigen Übungen in `uebungen/`
-3. Experimentiere mit den Beispielen in `beispiele/`
+3. Nutze die interaktiven Notebooks in `notebooks/`
+4. Experimentiere mit den Beispielen in `beispiele/`
+5. Teste dein Wissen mit `quiz/ki_quiz.py`
 
 ## Lizenz
 
