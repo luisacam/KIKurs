@@ -157,6 +157,38 @@ print(f"E-Mail: '{neue_email[0]}'")
 print(f"Vorhersage: {'SPAM' if vorhersage[0] == 1 else 'Kein Spam'}")
 ```
 
+## Projekt 4: Video-Transkription 🎙️
+
+Eine der bekanntesten KI-Anwendungen: gesprochene Sprache in Text umwandeln
+(**Speech-to-Text**). Moderne Systeme wie OpenAI **Whisper** nutzen dafür
+Transformer-Netzwerke, die auf riesigen Mengen Audio-Daten trainiert wurden.
+
+**Wie es funktioniert (vereinfacht):**
+
+1. Das Audio wird in kleine Zeitfenster zerlegt.
+2. Jedes Fenster wird in ein Spektrogramm (Frequenz-Darstellung) umgewandelt.
+3. Ein neuronales Netz sagt aus dem Spektrogramm Text-Tokens vorher.
+4. Die Tokens werden zu einem Satz zusammengefügt.
+
+**Benötigt:**
+
+```bash
+pip install openai-whisper
+# sowie ffmpeg auf dem System
+```
+
+**Verwendung:**
+
+```bash
+python beispiele/video_transkription.py mein_video.mp4
+python beispiele/video_transkription.py vorlesung.mp4 --modell small --sprache de --srt
+```
+
+Das Skript erzeugt eine `.txt`-Datei mit dem erkannten Text. Mit `--srt`
+entsteht zusätzlich eine Untertitel-Datei mit Zeitstempeln.
+
+Den kompletten Code findest du in `beispiele/video_transkription.py`.
+
 ## Der ML-Workflow in der Praxis
 
 ```

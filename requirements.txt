@@ -15,3 +15,7 @@ matplotlib>=3.4.0
 
 # Optional: Jupyter Notebooks
 jupyter>=1.0.0
+
+# Optional: Video-Transkription (Beispiel beispiele/video_transkription.py)
+# Benötigt zusätzlich ffmpeg auf dem System.
+# openai-whisper>=20231117
